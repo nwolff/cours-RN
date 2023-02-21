@@ -14,7 +14,7 @@ if st.button("Get random prediction"):
     response = json.loads(response.text)
     preds = response.get("prediction")
     image = response.get("image")
-    image = np.reshape(image, (28, 28))
+    image = np.array(image)
 
     st.sidebar.image(image, width=150)
 
