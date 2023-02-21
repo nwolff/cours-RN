@@ -3,4 +3,6 @@ tensorflow-macos; sys_platform == 'darwin'
 numpy
 matplotlib
 
+flask
+
 black
