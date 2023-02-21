@@ -3,8 +3,6 @@
 import json
 import tensorflow as tf
 import numpy as np
-import random
-
 from flask import Flask, request
 
 
@@ -39,4 +37,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=8888)

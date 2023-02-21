@@ -5,4 +5,7 @@ matplotlib
 
 flask
 
+streamlit
+requests
+
 black
