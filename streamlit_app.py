@@ -12,13 +12,15 @@ st.title("Visualiseur de Réseau de Neurones")
 st.sidebar.markdown("Image d'entrée")
 
 if st.button("Prédiction aléatoire"):
-    response = requests.get(urljoin(BASE_URI, "random_prediction"))
+    response = requests.get(urljoin(BASE_URI, "prediction/random"))
     response = json.loads(response.text)
     preds = response.get("prediction")
     image = response.get("image")
+    image_index = response.get("image_index")
     image = np.array(image)
 
     st.sidebar.image(image, width=150)
+    st.sidebar.text(f"(Index : {image_index})")
 
     for layer, p in enumerate(preds):
         numbers = np.squeeze(np.array(p))
