@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 import argparse
-import random
 import json
-import tensorflow as tf
-import numpy as np
-from flask import Flask, request
+import random
 
+import numpy as np
+import tensorflow as tf
+from flask import Flask
+
+from helpers import map_leaves, np_arrays_to_lists, round_numbers, tf_variable_to_np
 
 app = Flask(__name__)
 
@@ -27,13 +29,27 @@ def get_random_prediction():
     return feature_model.predict(image_arr), image
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def index():
-    if request.method == "POST":
-        preds, image = get_random_prediction()
-        final_preds = [p.tolist() for p in preds]
-        return json.dumps({"prediction": final_preds, "image": image.tolist()})
-    return "Welcome to the model server!"
+    return "Bienvenue au serveur de modèle"
+
+
+@app.route("/random_prediction")
+def random_prediction():
+    preds, image = get_random_prediction()
+    data = {"prediction": preds, "image": image}
+    data = map_leaves(np_arrays_to_lists, data)
+    data = map_leaves(round_numbers, data)
+    return json.dumps(data)
+
+
+@app.route("/weights")
+def weights():
+    weights = feature_model.weights
+    data = map_leaves(tf_variable_to_np, weights)
+    data = map_leaves(np_arrays_to_lists, data)
+    data = map_leaves(round_numbers, data)
+    return json.dumps(data)
 
 
 if __name__ == "__main__":

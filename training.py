@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-import tensorflow as tf
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
 
 
 def show_training_data(x_train, y_train):

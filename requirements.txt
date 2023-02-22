@@ -7,5 +7,3 @@ flask
 
 streamlit
 requests
-
-black

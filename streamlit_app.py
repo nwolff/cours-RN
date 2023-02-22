@@ -1,16 +1,18 @@
-import streamlit as st
 import json
-import requests
+from urllib.parse import urljoin
+
 import matplotlib.pyplot as plt
 import numpy as np
+import requests
+import streamlit as st
 
-URI = "http://localhost:8888"
+BASE_URI = "http://localhost:8888"
 
 st.title("Visualiseur de Réseau de Neurones")
 st.sidebar.markdown("Image d'entrée")
 
-if st.button("Recevoir une prédiction aléatoire"):
-    response = requests.post(URI, data={})
+if st.button("Prédiction aléatoire"):
+    response = requests.get(urljoin(BASE_URI, "random_prediction"))
     response = json.loads(response.text)
     preds = response.get("prediction")
     image = response.get("image")
