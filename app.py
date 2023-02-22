@@ -6,10 +6,10 @@ import numpy as np
 
 URI = "http://localhost:8888"
 
-st.title("Neural Network Visualizer")
-st.sidebar.markdown("Input Image")
+st.title("Visualiseur de Réseau de Neurones")
+st.sidebar.markdown("Image d'entrée")
 
-if st.button("Get random prediction"):
+if st.button("Recevoir une prédiction aléatoire"):
     response = requests.post(URI, data={})
     response = json.loads(response.text)
     preds = response.get("prediction")
@@ -36,5 +36,5 @@ if st.button("Get random prediction"):
 
         plt.subplots_adjust(wspace=0.05, hspace=0.05)
         plt.tight_layout()
-        st.text("Layer {}".format(layer + 1))
+        st.text("Couche {}".format(layer + 1))
         st.pyplot(fig)
