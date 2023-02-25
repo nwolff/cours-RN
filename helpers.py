@@ -36,6 +36,6 @@ def round_numbers(o, digits=3):
 
 def tf_variable_to_np(o):
     if isinstance(o, tf.Variable):
-        return tf_variable_to_np(o.numpy())
+        return o.numpy()
     else:
         return o
