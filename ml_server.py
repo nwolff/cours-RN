@@ -9,7 +9,7 @@ from flask import Flask
 
 from helpers import map_leaves, np_arrays_to_lists, round_numbers, tf_variable_to_np
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 
 
 model = tf.keras.models.load_model("model.h5")
@@ -32,7 +32,8 @@ def get_random_prediction():
 
 @app.route("/")
 def index():
-    return "Bienvenue au serveur de modèle"
+    urls = [rule.rule for rule in app.url_map.iter_rules()]
+    return json.dumps({"urls": urls})
 
 
 @app.route("/prediction/random")
