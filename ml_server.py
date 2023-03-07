@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 from flask import Flask
 
-from helpers import map_leaves, np_arrays_to_lists, round_numbers, tf_variable_to_np
+from helpers import np_to_python
 
 app = Flask(__name__, static_folder=None)
 
@@ -19,7 +19,7 @@ feature_model = tf.keras.models.Model(
 )
 
 # Load and normalize test data
-_, (x_test, _) = tf.keras.datasets.mnist.load_data()
+_, (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 x_test = x_test / 255
 
 
@@ -27,7 +27,8 @@ def get_random_prediction():
     image_index = random.randint(0, len(x_test))
     image = x_test[image_index]
     image_arr = np.reshape(image, (1, 784))
-    return feature_model.predict(image_arr), image, image_index
+    label = y_test[image_index]
+    return feature_model.predict(image_arr), image, image_index, label
 
 
 @app.route("/")
@@ -36,22 +37,22 @@ def index():
     return json.dumps({"urls": urls})
 
 
-@app.route("/prediction/random")
+@app.route("/predictions/random")
 def random_prediction():
-    preds, image, image_index = get_random_prediction()
-    data = {"prediction": preds, "image": image, "image_index": image_index}
-    data = map_leaves(np_arrays_to_lists, data)
-    data = map_leaves(round_numbers, data)
-    return json.dumps(data)
+    prediction, image, image_index, label = get_random_prediction()
+    data = {
+        "prediction": prediction,
+        "image": image,
+        "image_index": image_index,
+        "label": label,
+    }
+    return json.dumps(np_to_python(data))
 
 
 @app.route("/weights")
 def weights():
-    weights = feature_model.weights
-    data = map_leaves(tf_variable_to_np, weights)
-    data = map_leaves(np_arrays_to_lists, data)
-    data = map_leaves(round_numbers, data)
-    return json.dumps(data)
+    data = feature_model.weights
+    return json.dumps(np_to_python(data))
 
 
 if __name__ == "__main__":

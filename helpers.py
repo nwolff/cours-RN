@@ -20,6 +20,13 @@ def map_leaves(fn, o):
         return fn(o)
 
 
+def np_number_to_python(o):
+    if isinstance(o, numpy.number):
+        return o.item()
+    else:
+        return o
+
+
 def np_arrays_to_lists(o):
     if isinstance(o, numpy.ndarray):
         return o.tolist()
@@ -39,3 +46,11 @@ def tf_variable_to_np(o):
         return o.numpy()
     else:
         return o
+
+
+def np_to_python(data):
+    data = map_leaves(tf_variable_to_np, data)
+    data = map_leaves(np_arrays_to_lists, data)
+    data = map_leaves(np_number_to_python, data)
+    data = map_leaves(round_numbers, data)
+    return data
