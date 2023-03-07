@@ -29,26 +29,23 @@ if st.button("Prédiction aléatoire"):
     st.sidebar.text(f"(Index : {image_index})")
 
     for layer, p in enumerate(prediction):
-        activations = np.squeeze(np.array(p))
+        activations = np.array(p)
         fig = plt.figure(figsize=(32, 4))
         if layer == 2:  # The last layer
+            activations = np.squeeze(activations)
             row, col = 1, 10
-        else:
-            row, col = 1, 32
-        for i, activation in enumerate(activations):
-            plt.subplot(row, col, i + 1)
-            plt.imshow(activation * np.ones((1, 1, 3)).astype("float32"))
-            plt.xticks([])
-            plt.yticks([])
-
-            if layer == 2:
+            for i, activation in enumerate(activations):
+                plt.subplot(row, col, i + 1)
+                plt.imshow(activation * np.ones((1, 1, 3)).astype("float32"))
+                plt.xticks([])
+                plt.yticks([])
                 if label == i:
                     label_color = "red"
                 else:
                     label_color = "black"
                 plt.xlabel(str(i), fontsize=50, labelpad=20, color=label_color)
-
-        # plt.subplots_adjust(wspace=0.05, hspace=0.05)
+        else:
+            plt.imshow(activations, cmap="Reds")
         plt.tight_layout()
         st.text("Couche {}".format(layer + 1))
         st.pyplot(fig)
