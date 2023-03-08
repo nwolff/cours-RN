@@ -11,7 +11,8 @@ BASE_URI = "http://localhost:8888"
 
 def input_layer_fig(image):
     fig = plt.figure()
-    image_arr = np.reshape(image, (8, 28 * 28 // 8))
+    rows = 16
+    image_arr = np.reshape(image, (rows, 28 * 28 // rows))
     plt.imshow(image_arr, cmap="Greens")
     plt.xticks([])
     plt.yticks([])
@@ -57,10 +58,7 @@ def output_layer_fig(p):
     return fig
 
 
-st.title("Visualiseur de Réseau de Neurones")
-st.sidebar.markdown("Image d'entrée")
-
-if st.button("Prédiction aléatoire"):
+if st.sidebar.button("Prédiction aléatoire"):
     response = requests.get(urljoin(BASE_URI, "predictions/random"))
     response = json.loads(response.text)
     prediction = response["prediction"]
@@ -69,6 +67,7 @@ if st.button("Prédiction aléatoire"):
     correct_answer = response["correct_answer"]
     image = np.array(image)
 
+    st.sidebar.header("Image d'entrée")
     st.sidebar.image(image, width=150)
     st.sidebar.text(f"(Index : {image_index})")
 
