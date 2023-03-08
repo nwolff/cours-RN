@@ -29,35 +29,34 @@ if st.button("Prédiction aléatoire"):
     st.sidebar.text(f"(Index : {image_index})")
 
     # Input layer
-    fig = plt.figure(figsize=(32, 4))
+    fig = plt.figure()
     image_arr = np.reshape(image, (8, 28 * 28 // 8))
-    plt.imshow(image_arr, cmap="Reds")
+    plt.imshow(image_arr, cmap="Greens")
     plt.xticks([])
     plt.yticks([])
-    st.text("Couche d'entree")
+    st.text("Couche d'entrée")
     st.pyplot(fig)
 
-    # Other layers
-    for layer, p in enumerate(prediction):
+    # Inner layers
+    for layer, p in enumerate(prediction[:-1]):
         activations = np.array(p)
-        fig = plt.figure(figsize=(32, 4))
-        if layer != 2:
-            plt.imshow(activations, cmap="Reds")
-            plt.xticks([])
-            plt.yticks([])
-        else:  # Last layer
-            activations = np.squeeze(activations)
-            row, col = 1, 10
-            for i, activation in enumerate(activations):
-                plt.subplot(row, col, i + 1)
-                plt.imshow(activation * np.ones((1, 1, 3)).astype("float32"))
-                plt.xticks([])
-                plt.yticks([])
-                if label == i:
-                    label_color = "red"
-                else:
-                    label_color = "black"
-                plt.xlabel(str(i), fontsize=50, labelpad=20, color=label_color)
-        plt.tight_layout()
-        st.text("Couche {}".format(layer + 1))
+        fig = plt.figure()
+        plt.imshow(activations, cmap="Blues")
+        plt.xticks([])
+        plt.yticks([])
+        st.text("Couche cachée {}".format(layer + 1))
         st.pyplot(fig)
+
+    # Output layer
+    fig = plt.figure()
+    activations = np.array(prediction[-1])
+    im = plt.imshow(activations, cmap="Reds")
+    output = np.squeeze(activations)  # Just a 1D array
+    plt.xticks(np.arange(len(output)))
+    plt.yticks([])
+    # Show scores inside boxes. Text in white is hard to read when values are low, which is on purpose
+    ax = im.axes
+    for i, o in enumerate(output):
+        ax.text(i, 0, o, ha="center", va="center", color="w")
+    st.text("Couche de sortie")
+    st.pyplot(fig)
