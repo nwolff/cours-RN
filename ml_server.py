@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-import argparse
+
+"""
+To run in debug mode :  flask --app ml_server.py run --debug
+Note that will reload incessantly, because it monitors all files, including the .env file
+and I think tensorflow writes files there.
+"""
 import json
 import random
 
@@ -10,7 +15,6 @@ from flask import Flask
 import serialization
 
 app = Flask(__name__, static_folder=None)
-
 
 model = tf.keras.models.load_model("model.h5")
 
@@ -56,7 +60,4 @@ def weights():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--debug", action="store_true")
-    args = parser.parse_args()
-    app.run(host="0.0.0.0", port=8888, debug=args.debug)
+    app.run(host="0.0.0.0", port=8888)  # Listen on all interfaces

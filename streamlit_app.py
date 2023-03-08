@@ -1,8 +1,3 @@
-# To run:
-#
-# streamlit run streamlit_app.py
-#
-
 import json
 from urllib.parse import urljoin
 

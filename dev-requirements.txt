@@ -2,4 +2,5 @@
 
 black
 isort
-watchdog
+
+watchdog # For faster reloading of the streamlit app
