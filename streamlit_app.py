@@ -13,7 +13,7 @@ def input_layer_fig(image):
     fig = plt.figure()
     rows = 16
     image_arr = np.reshape(image, (rows, 28 * 28 // rows))
-    plt.imshow(image_arr, cmap="Greens")
+    plt.imshow(image_arr, cmap="Greys")
     plt.xticks([])
     plt.yticks([])
     return fig
@@ -22,7 +22,7 @@ def input_layer_fig(image):
 def hidden_layer_fig(p):
     activations = np.array(p)
     fig = plt.figure()
-    plt.imshow(activations, cmap="Blues")
+    plt.imshow(activations, cmap="BuGn")
     plt.xticks([])
     plt.yticks([])
     return fig
@@ -31,7 +31,7 @@ def hidden_layer_fig(p):
 def output_layer_fig(p):
     fig = plt.figure()
     activations = np.array(p)
-    im = plt.imshow(activations, cmap="Reds")
+    im = plt.imshow(activations, cmap="Greens")
 
     output = np.squeeze(activations)  # Just a 1D array
 
@@ -68,7 +68,7 @@ if st.sidebar.button("Prédiction aléatoire"):
     image = np.array(image)
 
     st.sidebar.header("Image d'entrée")
-    st.sidebar.image(image, width=150)
+    st.sidebar.image(1 - image, width=150)
     st.sidebar.text(f"(Index : {image_index})")
 
     # Input layer
