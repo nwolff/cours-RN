@@ -9,22 +9,32 @@ import streamlit as st
 BASE_URI = "http://localhost:8888"
 
 
+def add_grid(im, image_arr):
+    # Grid to sse pixels better
+    shape = image_arr.shape
+    plt.xticks(np.arange(shape[1]) - 0.5, minor=True)
+    plt.yticks(np.arange(shape[0]) - 0.5, minor=True)
+    plt.grid(which="minor")
+    # ... but no ticks, nor labels
+    im.axes.tick_params(axis="both", which="both", length=0)
+    im.axes.xaxis.set_ticklabels([])
+    im.axes.yaxis.set_ticklabels([])
+
+
 def input_layer_fig(image):
     fig = plt.figure()
     rows = 16
     image_arr = np.reshape(image, (rows, 28 * 28 // rows))
-    plt.imshow(image_arr, cmap="Greys")
-    plt.xticks([])
-    plt.yticks([])
+    im = plt.imshow(image_arr, cmap="Greys")
+    add_grid(im, image_arr)
     return fig
 
 
 def hidden_layer_fig(p):
     activations = np.array(p)
     fig = plt.figure()
-    plt.imshow(activations, cmap="BuGn")
-    plt.xticks([])
-    plt.yticks([])
+    im = plt.imshow(activations, cmap="BuGn")
+    add_grid(im, activations)
     return fig
 
 
@@ -33,7 +43,15 @@ def output_layer_fig(p):
     activations = np.array(p)
     im = plt.imshow(activations, cmap="Greens")
 
+    # A grid with no ticks
+    add_grid(im, activations)
+
     output = np.squeeze(activations)  # Just a 1D array
+
+    # Show scores inside boxes. Text in white is hard to read when values are low, which is on purpose
+    ax = im.axes
+    for i, o in enumerate(output):
+        ax.text(i, 0, int(o * 100), ha="center", va="center", color="w")
 
     # Ticks with highlighted correct answer
     label_texts = []
@@ -43,17 +61,6 @@ def output_layer_fig(p):
         else:
             label_texts.append(i)
     plt.xticks(np.arange(len(output)), labels=label_texts)
-    im.axes.tick_params(axis="both", which="both", length=0)
-    plt.yticks([])
-
-    # Grid
-    plt.xticks(np.arange(len(output)) - 0.5, minor=True)
-    plt.grid(which="minor")
-
-    # Show scores inside boxes. Text in white is hard to read when values are low, which is on purpose
-    ax = im.axes
-    for i, o in enumerate(output):
-        ax.text(i, 0, int(o * 100), ha="center", va="center", color="w")
 
     return fig
 
