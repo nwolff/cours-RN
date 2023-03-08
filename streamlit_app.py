@@ -42,6 +42,7 @@ def output_layer_fig(p):
         else:
             label_texts.append(i)
     plt.xticks(np.arange(len(output)), labels=label_texts)
+    im.axes.tick_params(axis="both", which="both", length=0)
     plt.yticks([])
 
     # Grid
