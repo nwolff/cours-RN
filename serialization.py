@@ -34,7 +34,7 @@ def np_arrays_to_lists(o):
         return o
 
 
-def round_numbers(o, digits=3):
+def round_numbers(o, digits=2):
     if isinstance(o, float):
         return round(o, digits)
     else:
