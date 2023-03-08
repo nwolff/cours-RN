@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 from flask import Flask
 
-from helpers import np_to_python
+import serialization
 
 app = Flask(__name__, static_folder=None)
 
@@ -46,13 +46,13 @@ def random_prediction():
         "image_index": image_index,
         "label": label,
     }
-    return json.dumps(np_to_python(data))
+    return json.dumps(serialization.np_to_python(data))
 
 
 @app.route("/weights")
 def weights():
     data = feature_model.weights
-    return json.dumps(np_to_python(data))
+    return json.dumps(serialization.np_to_python(data))
 
 
 if __name__ == "__main__":

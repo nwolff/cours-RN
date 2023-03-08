@@ -41,7 +41,11 @@ if st.button("Prédiction aléatoire"):
     for layer, p in enumerate(prediction):
         activations = np.array(p)
         fig = plt.figure(figsize=(32, 4))
-        if layer == 2:  # The last layer
+        if layer != 2:
+            plt.imshow(activations, cmap="Reds")
+            plt.xticks([])
+            plt.yticks([])
+        else:  # Last layer
             activations = np.squeeze(activations)
             row, col = 1, 10
             for i, activation in enumerate(activations):
@@ -54,10 +58,6 @@ if st.button("Prédiction aléatoire"):
                 else:
                     label_color = "black"
                 plt.xlabel(str(i), fontsize=50, labelpad=20, color=label_color)
-        else:
-            plt.imshow(activations, cmap="Reds")
-            plt.xticks([])
-            plt.yticks([])
         plt.tight_layout()
         st.text("Couche {}".format(layer + 1))
         st.pyplot(fig)
