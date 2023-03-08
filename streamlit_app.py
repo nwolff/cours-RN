@@ -53,7 +53,7 @@ def output_layer_fig(p):
     # Show scores inside boxes. Text in white is hard to read when values are low, which is on purpose
     ax = im.axes
     for i, o in enumerate(output):
-        ax.text(i, 0, o, ha="center", va="center", color="w")
+        ax.text(i, 0, int(o * 100), ha="center", va="center", color="w")
 
     return fig
 
