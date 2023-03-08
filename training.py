@@ -44,8 +44,8 @@ _ = model.fit(
     x_train,
     y_train,
     validation_data=(x_test, y_test),
-    epochs=40,
-    batch_size=128,
+    epochs=15,
+    batch_size=1024,
     verbose=2,
 )
 
