@@ -27,12 +27,17 @@ _, (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 x_test = x_test / 255
 
 
-def get_random_prediction():
-    image_index = random.randint(0, len(x_test))
+def get_prediction(image_index):
     image = x_test[image_index]
     image_arr = np.reshape(image, (1, 784))
     correct_answer = y_test[image_index]
-    return feature_model.predict(image_arr), image, image_index, correct_answer
+    prediction = feature_model.predict(image_arr)
+    return {
+        "prediction": prediction,
+        "image": image,
+        "image_index": image_index,
+        "correct_answer": correct_answer,
+    }
 
 
 @app.route("/")
@@ -43,13 +48,14 @@ def index():
 
 @app.route("/predictions/random")
 def random_prediction():
-    prediction, image, image_index, correct_answer = get_random_prediction()
-    data = {
-        "prediction": prediction,
-        "image": image,
-        "image_index": image_index,
-        "correct_answer": correct_answer,
-    }
+    image_index = random.randint(0, len(x_test))
+    data = get_prediction(image_index)
+    return json.dumps(serialization.np_to_python(data))
+
+
+@app.route("/predictions/<int:image_index>")
+def prediction(image_index):
+    data = get_prediction(image_index)
     return json.dumps(serialization.np_to_python(data))
 
 
