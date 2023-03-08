@@ -2,35 +2,46 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
+from tensorflow import keras
+
+from utils.image import resize
 
 
-def show_training_data(x_train, y_train):
+def show_training_data_sample(images, labels):
     plt.figure(figsize=(10, 10)),
     for i in range(16):
         plt.subplot(4, 4, i + 1)
-        plt.imshow(x_train[i], cmap="binary")
-        plt.xlabel(str(y_train[i]))
+        plt.imshow(images[i], cmap="binary")
+        plt.xlabel(str(labels[i]))
         plt.xticks([])
         plt.yticks([])
     plt.show()
 
 
-(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+mnist = keras.datasets.mnist
+(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
 
-# show_training_data(x_train, y_train)
+IMAGE_SIZE = 14
+
+print("resizing...")
+train_images = [resize(img, [IMAGE_SIZE, IMAGE_SIZE]) for img in train_images]
+test_images = [resize(img, [IMAGE_SIZE, IMAGE_SIZE]) for img in test_images]
+print("done")
+# show_training_data_sample(train_images, train_labels)
 
 # Unroll the pixel grids
-x_train = np.reshape(x_train, (60000, 28 * 28))
-x_test = np.reshape(x_test, (10000, 28 * 28))
+train_x = np.reshape(train_images, (60000, IMAGE_SIZE * IMAGE_SIZE))
+test_x = np.reshape(test_images, (10000, IMAGE_SIZE * IMAGE_SIZE))
 
 # Normalize values from 0 to 1
-x_train = x_train / 255
-x_test = x_test / 255
-
+train_x = train_x / 255
+test_x = test_x / 255
 
 model = tf.keras.models.Sequential(
     [
-        tf.keras.layers.Dense(32, activation="sigmoid", input_shape=(784,)),
+        tf.keras.layers.Dense(
+            32, activation="sigmoid", input_shape=(IMAGE_SIZE * IMAGE_SIZE,)
+        ),
         tf.keras.layers.Dense(32, activation="sigmoid"),
         tf.keras.layers.Dense(10, activation="softmax"),
     ]
@@ -41,11 +52,11 @@ model.compile(
 )
 
 _ = model.fit(
-    x_train,
-    y_train,
-    validation_data=(x_test, y_test),
-    epochs=15,
-    batch_size=1024,
+    train_x,
+    train_labels,
+    validation_data=(test_x, test_labels),
+    epochs=20,
+    batch_size=512,
     verbose=2,
 )
 

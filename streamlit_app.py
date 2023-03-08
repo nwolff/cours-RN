@@ -23,8 +23,8 @@ def add_grid(im, image_arr):
 
 def input_layer_fig(image):
     fig = plt.figure()
-    rows = 16
-    image_arr = np.reshape(image, (rows, 28 * 28 // rows))
+    rows = 2
+    image_arr = np.reshape(image, (rows, 14 * 14 // rows))
     im = plt.imshow(image_arr, cmap="Greys")
     add_grid(im, image_arr)
     return fig
@@ -65,6 +65,9 @@ def output_layer_fig(p):
     return fig
 
 
+st.set_page_config(layout="wide")
+
+
 if st.sidebar.button("Prédiction aléatoire"):
     response = requests.get(urljoin(BASE_URI, "predictions/random"))
     response = json.loads(response.text)
@@ -82,7 +85,7 @@ if st.sidebar.button("Prédiction aléatoire"):
     st.text("Couche d'entrée")
     st.pyplot(input_layer_fig(image))
 
-    # Inner layers
+    # Hidden layers
     for layer, p in enumerate(prediction[:-1]):
         st.text("Couche cachée {}".format(layer + 1))
         st.pyplot(hidden_layer_fig(p))

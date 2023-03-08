@@ -49,6 +49,7 @@ def tf_variable_to_np(o):
 
 
 def np_to_python(data):
+    # Order is important
     data = map_leaves(tf_variable_to_np, data)
     data = map_leaves(np_arrays_to_lists, data)
     data = map_leaves(np_number_to_python, data)
