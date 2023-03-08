@@ -28,6 +28,16 @@ if st.button("Prédiction aléatoire"):
     st.sidebar.image(image, width=150)
     st.sidebar.text(f"(Index : {image_index})")
 
+    # Input layer
+    fig = plt.figure(figsize=(32, 4))
+    image_arr = np.reshape(image, (8, 28 * 28 // 8))
+    plt.imshow(image_arr, cmap="Reds")
+    plt.xticks([])
+    plt.yticks([])
+    st.text("Couche d'entree")
+    st.pyplot(fig)
+
+    # Other layers
     for layer, p in enumerate(prediction):
         activations = np.array(p)
         fig = plt.figure(figsize=(32, 4))
@@ -46,6 +56,8 @@ if st.button("Prédiction aléatoire"):
                 plt.xlabel(str(i), fontsize=50, labelpad=20, color=label_color)
         else:
             plt.imshow(activations, cmap="Reds")
+            plt.xticks([])
+            plt.yticks([])
         plt.tight_layout()
         st.text("Couche {}".format(layer + 1))
         st.pyplot(fig)
