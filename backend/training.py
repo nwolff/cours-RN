@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 import matplotlib.pyplot as plt
 import numpy as np
-import tensorflow as tf
+from image import IMAGE_SIZE, resize
 from tensorflow import keras
-
-from utils.image import resize
 
 
 def show_training_data_sample(images, labels):
@@ -21,11 +19,9 @@ def show_training_data_sample(images, labels):
 mnist = keras.datasets.mnist
 (train_images, train_labels), (test_images, test_labels) = mnist.load_data()
 
-IMAGE_SIZE = 14
-
-print("resizing...")
-train_images = [resize(img, [IMAGE_SIZE, IMAGE_SIZE]) for img in train_images]
-test_images = [resize(img, [IMAGE_SIZE, IMAGE_SIZE]) for img in test_images]
+print("resizing images...")
+train_images = [resize(img) for img in train_images]
+test_images = [resize(img) for img in test_images]
 print("done")
 # show_training_data_sample(train_images, train_labels)
 
@@ -37,13 +33,13 @@ test_x = np.reshape(test_images, (10000, IMAGE_SIZE * IMAGE_SIZE))
 train_x = train_x / 255
 test_x = test_x / 255
 
-model = tf.keras.models.Sequential(
+model = keras.models.Sequential(
     [
-        tf.keras.layers.Dense(
+        keras.layers.Dense(
             32, activation="sigmoid", input_shape=(IMAGE_SIZE * IMAGE_SIZE,)
         ),
-        tf.keras.layers.Dense(32, activation="sigmoid"),
-        tf.keras.layers.Dense(10, activation="softmax"),
+        keras.layers.Dense(32, activation="sigmoid"),
+        keras.layers.Dense(10, activation="softmax"),
     ]
 )
 
@@ -60,4 +56,4 @@ _ = model.fit(
     verbose=2,
 )
 
-model.save("model.h5")
+model.save("models/digits.h5")

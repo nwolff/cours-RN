@@ -2,35 +2,31 @@
 
 """
 To run in debug mode :  flask --app ml_server.py run --debug
-Note that will reload incessantly, because it monitors all files, including the .env file
+Note that will reload incessantly, because it monitors all files, including the .env directory
 and I think tensorflow writes files there.
 """
 import json
 import random
 
 import numpy as np
-import tensorflow as tf
+import serialization
 from flask import Flask
-
-import utils.image
-from utils import serialization
-from utils.image import resize
-
+from image import IMAGE_SIZE, resize
+from tensorflow import keras
 
 app = Flask(__name__, static_folder=None)
 
-model = tf.keras.models.load_model("model.h5")
+model = keras.models.load_model("models/digits.h5")
 
-feature_model = tf.keras.models.Model(
+feature_model = keras.models.Model(
     inputs=model.input, outputs=[layer.output for layer in model.layers]
 )
 
 # Load and normalize test data
-_, (images_test, labels_test) = tf.keras.datasets.mnist.load_data()
+_, (images_test, labels_test) = keras.datasets.mnist.load_data()
 
-IMAGE_SIZE = 14
 # Resize images
-images_test = [resize(img, [IMAGE_SIZE, IMAGE_SIZE]) for img in images_test]
+images_test = [resize(img) for img in images_test]
 # Normalize values from 0 to 1
 images_test = [img / 255 for img in images_test]
 
@@ -69,7 +65,7 @@ def prediction(image_index):
 
 @app.route("/weights")
 def weights():
-    data = feature_model.weights
+    data = model.weights
     return json.dumps(serialization.np_to_python(data))
 
 

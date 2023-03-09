@@ -1,12 +1,11 @@
 import json
 from urllib.parse import urljoin
 
-import matplotlib.pyplot as plt
+import config
 import numpy as np
 import requests
 import streamlit as st
-
-BASE_URI = "http://localhost:8888"
+from matplotlib import pyplot as plt
 
 
 def add_grid(im, image_arr):
@@ -38,7 +37,7 @@ def hidden_layer_fig(p):
     return fig
 
 
-def output_layer_fig(p):
+def output_layer_fig(p, correct_answer):
     fig = plt.figure()
     activations = np.array(p)
     im = plt.imshow(activations, cmap="Greens")
@@ -51,7 +50,7 @@ def output_layer_fig(p):
     # Show scores inside boxes. Text in white is hard to read when values are low, which is on purpose
     ax = im.axes
     for i, o in enumerate(output):
-        ax.text(i, 0, int(o * 100), ha="center", va="center", color="w")
+        ax.text(i, 0, f"{int(o * 100)}%", ha="center", va="center", color="w")
 
     # Ticks with highlighted correct answer
     label_texts = []
@@ -65,22 +64,7 @@ def output_layer_fig(p):
     return fig
 
 
-st.set_page_config(layout="wide")
-
-
-if st.sidebar.button("Prédiction aléatoire"):
-    response = requests.get(urljoin(BASE_URI, "predictions/random"))
-    response = json.loads(response.text)
-    prediction = response["prediction"]
-    image = response["image"]
-    image_index = response["image_index"]
-    correct_answer = response["correct_answer"]
-    image = np.array(image)
-
-    st.sidebar.header("Image d'entrée")
-    st.sidebar.image(1 - image, width=150)
-    st.sidebar.text(f"(Index : {image_index})")
-
+def render_plt(image, prediction, correct_answer):
     # Input layer
     st.text("Couche d'entrée")
     st.pyplot(input_layer_fig(image))
@@ -92,4 +76,25 @@ if st.sidebar.button("Prédiction aléatoire"):
 
     # Output layer
     st.text("Couche de sortie")
-    st.pyplot(output_layer_fig(prediction[-1]))
+    st.pyplot(output_layer_fig(prediction[-1], correct_answer))
+
+
+def fetch_and_display(base_uri):
+    response = requests.get(urljoin(base_uri, "predictions/random"))
+    response = json.loads(response.text)
+    prediction = response["prediction"]
+    image = np.array(response["image"])
+    image_index = response["image_index"]
+    correct_answer = response["correct_answer"]
+
+    st.sidebar.header("Image d'entrée")
+    st.sidebar.image(1 - image, width=100)
+    st.sidebar.text(f"(Index : {image_index})")
+
+    render_plt(image, prediction, correct_answer)
+
+
+st.set_page_config(layout="wide")
+
+if st.sidebar.button("Prédiction aléatoire"):
+    fetch_and_display(config.BASE_URI)

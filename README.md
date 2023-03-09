@@ -1,10 +1,17 @@
 ## Training
 
-with the `raining.py`script
+cd `backend`
+Run `./training.py`
 
 ## Running
 
-`ml_server.py` loads the trained model and is capable of predicting. It serves a rest API
+cd `backend`
+Run `./ml_server.py` to load the trained model and serve 
+the NN weights and predictions over a rest API.
 
-`streamlit run streamlit_app.py` to run the frontend that uses the REST api.
+Run `streamlit run frontend/NNVisualizer.py` for the frontend that uses the REST api.
 
+## Developing
+
+`black .`
+`isort .`
