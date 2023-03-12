@@ -36,10 +36,13 @@ test_x = test_x / 255
 model = keras.models.Sequential(
     [
         keras.layers.Dense(
-            32, activation="sigmoid", input_shape=(IMAGE_SIZE * IMAGE_SIZE,)
+            32,
+            activation="sigmoid",
+            use_bias=False,
+            input_shape=(IMAGE_SIZE * IMAGE_SIZE,),
         ),
-        keras.layers.Dense(32, activation="sigmoid"),
-        keras.layers.Dense(10, activation="softmax"),
+        keras.layers.Dense(32, use_bias=False, activation="sigmoid"),
+        keras.layers.Dense(10, use_bias=False, activation="softmax"),
     ]
 )
 
