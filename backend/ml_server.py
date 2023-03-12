@@ -1,20 +1,13 @@
 #!/usr/bin/env python
 
-"""
-To run in debug mode :  flask --app ml_server.py run --debug
-Note that will reload incessantly, because it monitors all files, including the .env directory
-and I think tensorflow writes files there.
-"""
 import json
 import random
 
 import numpy as np
 import serialization
-from flask import Flask
+from bottle import route, run
 from image import IMAGE_SIZE, resize
 from tensorflow import keras
-
-app = Flask(__name__, static_folder=None)
 
 model = keras.models.load_model("models/digits.h5")
 
@@ -44,30 +37,24 @@ def get_prediction(image_index):
     }
 
 
-@app.route("/")
-def index():
-    urls = [rule.rule for rule in app.url_map.iter_rules()]
-    return json.dumps({"urls": urls})
-
-
-@app.route("/predictions/random")
+@route("/predictions/random")
 def random_prediction():
     image_index = random.randint(0, len(images_test))
     data = get_prediction(image_index)
     return json.dumps(serialization.np_to_python(data))
 
 
-@app.route("/predictions/<int:image_index>")
+@route("/predictions/<image_index:int>")
 def prediction(image_index):
     data = get_prediction(image_index)
     return json.dumps(serialization.np_to_python(data))
 
 
-@app.route("/weights")
+@route("/weights")
 def weights():
     data = model.weights
     return json.dumps(serialization.np_to_python(data))
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8888)  # Listen on all interfaces
+    run(host="0.0.0.0", port=8888)  # Listen on all interfaces
