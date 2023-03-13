@@ -1,10 +1,10 @@
 #!/usr/bin/env python
+import numpy as np
+from image import IMAGE_SIZE, resize
 from tensorflow import keras
 
 # For repeatable results
 keras.utils.set_random_seed(1)
-import numpy as np
-from image import IMAGE_SIZE, resize
 
 mnist = keras.datasets.mnist
 (train_images, train_labels), (test_images, test_labels) = mnist.load_data()
