@@ -2,10 +2,10 @@ import json
 from urllib.parse import urljoin
 
 import config
-import networkx as nx
 import plotly.graph_objects as go
 import requests
 import streamlit as st
+from network_layout import LayerSpec, Network
 
 
 def bla():
@@ -100,13 +100,33 @@ def bla():
     fig.show()
 
 
+def get_node_traces(n):
+    node_traces = []
+    for layer in n.layers:
+        positions = layer.neuron_positions
+        node_trace = go.Scattergl(
+            x=[p.x for p in positions],
+            y=[p.y for p in positions],
+            name=layer.name,
+            mode="markers",
+        )
+        node_traces.append(node_trace)
+    return go.Figure(node_traces)
+
+
 def fetch_and_display(base_uri):
     response = requests.get(urljoin(base_uri, "weights"))
     weights = json.loads(response.text)
-    for i, row in enumerate(weights):
-        st.header(i)
-        st.text("len" + str(len(row)) + ":")
-        st.text(row)
+    n = Network(
+        # LayerSpec("Couche d'entrée", 14 * 14, 49),
+        LayerSpec("Couche d'entrée", 49, 49),
+        LayerSpec("Couche cachée 1", 32),
+        LayerSpec("Couche cachée 2", 32),
+        LayerSpec("Couche de sortie", 10),
+    )
+    node_traces = get_node_traces(n)
+    fig = go.Figure(node_traces)
+    st.plotly_chart(fig)
 
 
 st.set_page_config(layout="wide")

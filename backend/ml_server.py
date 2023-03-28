@@ -30,10 +30,10 @@ def get_prediction(image_index):
     image_array = np.reshape(image, (1, IMAGE_SIZE * IMAGE_SIZE))
     prediction = feature_model.predict(image_array)
     return {
-        "prediction": prediction,
         "image": image,
         "image_index": image_index,
         "correct_answer": correct_answer,
+        "prediction": prediction,
     }
 
 
