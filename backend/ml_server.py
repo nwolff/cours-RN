@@ -45,7 +45,7 @@ def random_prediction():
 
 
 @route("/predictions/<image_index:int>")
-def prediction(image_index):
+def prediction_for_image(image_index):
     data = get_prediction(image_index)
     return json.dumps(serialization.np_to_python(data))
 
@@ -57,4 +57,5 @@ def weights():
 
 
 if __name__ == "__main__":
-    run(host="0.0.0.0", port=8888)  # Listen on all interfaces
+    # Listen on all interfaces
+    run(host="0.0.0.0", port=8888)

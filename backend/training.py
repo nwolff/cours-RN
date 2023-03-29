@@ -18,11 +18,11 @@ print("done")
 train_x = np.reshape(train_images, (60000, IMAGE_SIZE * IMAGE_SIZE)) / 255
 test_x = np.reshape(test_images, (10000, IMAGE_SIZE * IMAGE_SIZE)) / 255
 
-# ReLU instead of sigmoid for better results (but harder to draw neurons)
 model = keras.models.Sequential(
     [
         keras.layers.Input(shape=(IMAGE_SIZE * IMAGE_SIZE,)),
         keras.layers.Dense(32, use_bias=False, activation="sigmoid"),
+        # Use ReLU instead of sigmoid for better results (but harder to draw neurons)
         keras.layers.Dense(32, use_bias=False, activation="sigmoid"),
         keras.layers.Dense(10, use_bias=False, activation="softmax"),
     ]
@@ -31,7 +31,8 @@ model = keras.models.Sequential(
 print(model.summary())
 
 model.compile(
-    loss="sparse_categorical_crossentropy",  # Because our classes are mutually exclusive
+    # crossentropy Because our classes are mutually exclusive
+    loss="sparse_categorical_crossentropy",
     optimizer="adam",
     metrics=["accuracy"],
 )

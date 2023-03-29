@@ -5,7 +5,8 @@ import config
 import plotly.graph_objects as go
 import requests
 import streamlit as st
-from network_layout import LayerSpec, Network
+import traces
+from lib.network_layout import FeedForwardNetwork, LayerSpec
 
 
 def bla():
@@ -100,33 +101,29 @@ def bla():
     fig.show()
 
 
-def get_node_traces(n):
-    node_traces = []
-    for layer in n.layers:
-        positions = layer.neuron_positions
-        node_trace = go.Scattergl(
-            x=[p.x for p in positions],
-            y=[p.y for p in positions],
-            name=layer.name,
-            mode="markers",
-        )
-        node_traces.append(node_trace)
-    return go.Figure(node_traces)
-
-
 def fetch_and_display(base_uri):
     response = requests.get(urljoin(base_uri, "weights"))
     weights = json.loads(response.text)
-    n = Network(
-        # LayerSpec("Couche d'entrée", 14 * 14, 49),
-        LayerSpec("Couche d'entrée", 49, 49),
-        LayerSpec("Couche cachée 1", 32),
-        LayerSpec("Couche cachée 2", 32),
-        LayerSpec("Couche de sortie", 10),
+
+    n = FeedForwardNetwork(
+        LayerSpec("Couche d'entrée", 14 * 14, marker_size=10, neurons_per_row=7 * 7),
+        LayerSpec("Couche cachée 1", 32, marker_size=16),
+        LayerSpec("Couche cachée 2", 32, marker_size=16),
+        LayerSpec("Couche de sortie", 10, marker_size=50),
     )
-    node_traces = get_node_traces(n)
-    fig = go.Figure(node_traces)
-    st.plotly_chart(fig)
+
+    neuron_traces = traces.neuron_traces(n)
+    n.weights = weights
+    connection_traces = traces.connection_traces(n)
+    fig = go.Figure(connection_traces + neuron_traces)
+    fig.update_xaxes(visible=False)
+    fig.update_yaxes(visible=False)
+    fig.update_layout(
+        showlegend=False,
+        height=700,  # XXX
+        font=dict(size=16, color="white"),
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
 
 st.set_page_config(layout="wide")
