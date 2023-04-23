@@ -1,4 +1,5 @@
-tensorflow
+tensorflow; sys_platform == 'linux'
+tensorflow-macos; sys_platform == 'darwin'
 numpy
 pillow
 
