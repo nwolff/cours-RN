@@ -27,14 +27,14 @@ def np_number_to_python(o):
         return o
 
 
-def np_arrays_to_lists(o):
+def np_array_to_list(o):
     if isinstance(o, numpy.ndarray):
         return o.tolist()
     else:
         return o
 
 
-def round_numbers(o, digits=2):
+def round_number(o, digits=2):
     if isinstance(o, float):
         return round(o, digits)
     else:
@@ -51,7 +51,7 @@ def tf_variable_to_np(o):
 def np_to_python(data):
     # Order is important
     data = map_leaves(tf_variable_to_np, data)
-    data = map_leaves(np_arrays_to_lists, data)
+    data = map_leaves(np_array_to_list, data)
     data = map_leaves(np_number_to_python, data)
-    data = map_leaves(round_numbers, data)
+    data = map_leaves(round_number, data)
     return data
