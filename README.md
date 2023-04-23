@@ -15,5 +15,5 @@ Run `streamlit run frontend/NNVisualizer.py` for the frontend that uses the REST
 
 `black .`
 `isort .`
-`pytype -k .`
+`mypy .`
 

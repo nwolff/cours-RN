@@ -2,6 +2,6 @@
 
 black
 isort
-pytype
+mypy
 bpython
 watchdog # For faster reloading of the streamlit app
