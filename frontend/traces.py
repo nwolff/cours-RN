@@ -1,5 +1,6 @@
 import colorsys
 from collections import defaultdict
+from typing import Optional
 
 import plotly.graph_objects as go
 from lib.network_layout import FeedForwardNetwork, Link
@@ -40,7 +41,7 @@ def color_for_weight(weight: float) -> str:
         if weight < -1:
             print("funny weight", weight)
             weight = -1
-        hue = 0
+        hue = 0.0
         saturation = -weight
         value = 1
     else:
@@ -66,8 +67,8 @@ def link_traces(links: list[Link]) -> list[go.Scatter]:
 
     # Each bucket contains a list of coordinates with holes.
     # See the gaps section of:  https://plotly.com/python/line-charts/
-    edge_x_buckets = defaultdict(list)
-    edge_y_buckets = defaultdict(list)
+    edge_x_buckets: dict[int, list[Optional[float]]] = defaultdict(list)
+    edge_y_buckets: dict[int, list[Optional[float]]] = defaultdict(list)
     for link in links:
         bucket_index = int(link.weight * divisor)
         edge_x = edge_x_buckets[bucket_index]

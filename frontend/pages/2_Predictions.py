@@ -37,8 +37,7 @@ def fetch_and_display(base_uri):
     n.set_activations([image.flatten()] + [np.squeeze(p) for p in prediction])
 
     def link_filter(link: Link) -> bool:
-        if link.a.activation > 0.15 and abs(link.weight) > 0.3:
-            return True
+        return link.a.activation > 0.15 and abs(link.weight) > 0.3
 
     links = n.get_links(weights, link_filter)
     fig = go.Figure(link_traces(links) + neuron_traces(n))
