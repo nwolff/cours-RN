@@ -4,4 +4,4 @@ the main entrypoint (or we get streamlit errors).
 
 So we put the shared stuff in this module.
 """
-BASE_URI = "http://localhost:8888"
+MLSERVER_BASE_URI = "http://localhost:8888"

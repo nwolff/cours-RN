@@ -3,7 +3,7 @@ from collections import defaultdict
 from typing import Optional
 
 import plotly.graph_objects as go
-from lib.network_layout import FeedForwardNetwork, Link
+from network_layout import FeedForwardNetwork, Link
 
 
 def neuron_traces(network: FeedForwardNetwork) -> list[go.Scatter]:

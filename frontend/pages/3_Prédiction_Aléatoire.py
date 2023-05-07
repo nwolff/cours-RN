@@ -6,7 +6,7 @@ import numpy as np
 import plotly.graph_objects as go
 import requests
 import streamlit as st
-from lib.network_layout import FeedForwardNetwork, LayerSpec, Link
+from network_layout import FeedForwardNetwork, LayerSpec, Link
 from traces import link_traces, neuron_traces
 
 
@@ -54,4 +54,4 @@ def fetch_and_display(base_uri):
 st.set_page_config(layout="wide")
 
 if st.sidebar.button("Prédiction aléatoire"):
-    fetch_and_display(config.BASE_URI)
+    fetch_and_display(config.MLSERVER_BASE_URI)
