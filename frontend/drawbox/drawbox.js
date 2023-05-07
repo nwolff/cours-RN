@@ -25,26 +25,7 @@
       // ----------------------------------------------------
       // Now modify this part of the code to fit your needs:
 
-      var drawbox = document.getElementById("drawbox");
-
-      // data is any JSON-serializable value you sent from Python,
-      // and it's already deserialized for you.
-      function onDataFromPython(event) {
-        if (event.data.type !== "streamlit:render") return;
-        drawbox.value = event.data.args.my_input_value;  // Access values sent from Python here!
-      }
-
-      drawbox.addEventListener("change", function() {
-        console.log("sending to python", myInput.value);
-        sendDataToPython({
-          value: myInput.value,
-          dataType: "json",
-        });
-        console.log("done sending to python");
-      })
-
-      // Hook things up!
-      window.addEventListener("message", onDataFromPython);
+       // Hook things up!
       init();
 
       // Hack to autoset the iframe height.
@@ -66,11 +47,11 @@ function processImage(canvas) {
   const ctxScaled = document.getElementById('scaled-canvas').getContext('2d')
   ctxScaled.save();
   ctxScaled.clearRect(0, 0, ctxScaled.canvas.height, ctxScaled.canvas.width);
-  ctxScaled.scale(28.0 / ctx.canvas.width, 28.0 / ctx.canvas.height)
+  ctxScaled.scale(14.0 / ctx.canvas.width, 14.0 / ctx.canvas.height)
   ctxScaled.drawImage(document.getElementById('canvas'), 0, 0)
-  const {data} = ctxScaled.getImageData(0, 0, 28, 28)
+  const data = ctxScaled.getImageData(0, 0, 14, 14)
   ctxScaled.restore();
-  return document.getElementById('scaled-canvas')
+  return data;
 }
 
 // Canvas setup
@@ -105,16 +86,18 @@ $("#clear-canvas").click(function(){
   canvas.clear();
   canvas.backgroundColor = "#ffffff";
   canvas.renderAll();
-  updateChart(zeros);
   $("#status").removeClass();
 });
 
 
 function predict(){
-  // Change status indicator
-  if (!firstPrediction) {
-    $("#status").removeClass().toggleClass("fa fa-spinner fa-spin");
-  }
-
+  console.log("predicting");
   pixels = processImage(canvas);
+  console.log("got pixels");
+  console.log(pixels);
+  sendDataToPython({
+      value: pixels,
+      dataType: "json",
+   });
+  console.log("done sending to python");
 };
