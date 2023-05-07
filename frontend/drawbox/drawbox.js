@@ -25,16 +25,16 @@
       // ----------------------------------------------------
       // Now modify this part of the code to fit your needs:
 
-      var myInput = document.getElementById("drawbox");
+      var drawbox = document.getElementById("drawbox");
 
       // data is any JSON-serializable value you sent from Python,
       // and it's already deserialized for you.
       function onDataFromPython(event) {
         if (event.data.type !== "streamlit:render") return;
-        myInput.value = event.data.args.my_input_value;  // Access values sent from Python here!
+        drawbox.value = event.data.args.my_input_value;  // Access values sent from Python here!
       }
 
-      myInput.addEventListener("change", function() {
+      drawbox.addEventListener("change", function() {
         console.log("sending to python", myInput.value);
         sendDataToPython({
           value: myInput.value,
@@ -57,3 +57,63 @@
       // Optionally, if the automatic height computation fails you, give this component a height manually
       // by commenting out below:
       //setFrameHeight(200);
+
+// The canvas stuff
+
+function processImage(canvas) {
+  // Convert on-screen image to something we can feed into our model.
+  ctx = canvas.getContext('2d');
+  const ctxScaled = document.getElementById('scaled-canvas').getContext('2d')
+  ctxScaled.save();
+  ctxScaled.clearRect(0, 0, ctxScaled.canvas.height, ctxScaled.canvas.width);
+  ctxScaled.scale(28.0 / ctx.canvas.width, 28.0 / ctx.canvas.height)
+  ctxScaled.drawImage(document.getElementById('canvas'), 0, 0)
+  const {data} = ctxScaled.getImageData(0, 0, 28, 28)
+  ctxScaled.restore();
+  return document.getElementById('scaled-canvas')
+}
+
+// Canvas setup
+var canvas = new fabric.Canvas('canvas');
+canvas.isDrawingMode = true;
+canvas.freeDrawingBrush.width = 12;
+canvas.freeDrawingBrush.color = "#000000";
+canvas.backgroundColor = "#ffffff";
+canvas.renderAll();
+
+// We don't want to do a prediction on every mouse move so we group
+// the predictions according to the tuning variable movesPerPrediction.
+var mouseMoveCount = 0;
+var movesPerPrediction = 25;
+var drawing = false;
+
+function onMouseMove() {
+  if (drawing && mouseMoveCount++ > movesPerPrediction) {
+    canvas.freeDrawingBrush._finalizeAndAddPath();
+    (async () => { predict(); })();
+    mouseMoveCount = 0;
+  }
+}
+
+canvas.on('mouse:up',   () => {drawing = false; predict();});
+canvas.on('mouse:down', () => {drawing = true;});
+canvas.on('mouse:move', onMouseMove);
+
+// Clear button callback
+$("#clear-canvas").click(function(){
+  canvas.clear();
+  canvas.backgroundColor = "#ffffff";
+  canvas.renderAll();
+  updateChart(zeros);
+  $("#status").removeClass();
+});
+
+
+function predict(){
+  // Change status indicator
+  if (!firstPrediction) {
+    $("#status").removeClass().toggleClass("fa fa-spinner fa-spin");
+  }
+
+  pixels = processImage(canvas);
+};
