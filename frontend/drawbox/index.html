@@ -2,10 +2,14 @@
   <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="fabric.min.js"></script>
+    <link rel="stylesheet" href="drawbox.css">
   </head>
   <body>
     <input id="drawbox" value="" />
-    <canvas id="canvas" width="336" height="336"></canvas>
+    <div class="input-canvas-wrapper">
+      <canvas id="canvas" width="160" height="160"></canvas>
+    </div>
+    <button id="clear-canvas" onclick="this.blur()">Effacer</button>
     <script src="drawbox.js"></script>
   </body>
 </html>

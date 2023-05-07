@@ -1,0 +1,11 @@
+.input-canvas-wrapper {
+    width: 160;
+    height: 160;
+    border: 8px dashed #666;
+    border-radius: 8px;
+    box-sizing: content-box;
+
+    canvas {
+      touch-action: none;
+    }
+}
