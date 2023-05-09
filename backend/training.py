@@ -41,7 +41,7 @@ history = model.fit(
     train_x,
     train_labels,
     validation_data=(test_x, test_labels),
-    epochs=20,
+    epochs=40,
     batch_size=512,
     verbose=2,
 )

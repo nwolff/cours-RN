@@ -67,7 +67,7 @@ function processImage(canvas) {
   // Convert to grayscale between 0 and 1
   grayscale = [];
   for (i = 0; i * 4 < imageData.data.length; i++) {
-    grayscale[i] = Math.round((1 - imageData.data[i * 4] / 255) * 100) / 100;
+    grayscale[i] = Math.round((1 - imageData.data[i * 4] / 255) * 1000) / 1000;
   }
   return groupArr(grayscale, ctxScaled.canvas.width);
 }
@@ -75,7 +75,7 @@ function processImage(canvas) {
 // Canvas setup
 var canvas = new fabric.Canvas('canvas');
 canvas.isDrawingMode = true;
-canvas.freeDrawingBrush.width = 12;
+canvas.freeDrawingBrush.width = 10;
 canvas.freeDrawingBrush.color = "#000000";
 canvas.backgroundColor = "#ffffff";
 canvas.renderAll();

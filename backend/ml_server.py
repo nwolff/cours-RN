@@ -39,10 +39,7 @@ def get_prediction_for_dataset_image(image_index):
 
 @route("/predictions", method="POST")
 def prediction_for_image():
-    print("in prediction for images")
-    postdata = request.body.read()
-    print(postdata)
-    image = images_test[1]
+    image = json.load(request.body)
     image_array = np.reshape(image, (1, IMAGE_SIZE * IMAGE_SIZE))
     prediction = feature_model.predict(image_array)
     return json.dumps(serialization.np_to_python(prediction))

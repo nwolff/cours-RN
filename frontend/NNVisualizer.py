@@ -19,9 +19,8 @@ st.sidebar.success("Choisissez dans le menu au-dessus.")
 
 
 def prediction_plot(base_uri, image):
-    image_json = json.dumps(serialization.np_to_python(image))
     prediction_response = requests.post(
-        urljoin(base_uri, "predictions"), json=image_json
+        urljoin(base_uri, "predictions"), json=serialization.np_to_python(image)
     )
     prediction = json.loads(prediction_response.text)
 
