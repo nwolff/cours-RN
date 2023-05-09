@@ -2,7 +2,7 @@ import numpy as np
 from PIL import Image
 from tensorflow import keras
 
-IMAGE_SIZE = 14
+IMAGE_SIZE = 28
 
 
 def resize(np_img, size=(IMAGE_SIZE, IMAGE_SIZE)):

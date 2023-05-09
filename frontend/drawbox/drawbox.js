@@ -75,7 +75,7 @@ function processImage(canvas) {
 // Canvas setup
 var canvas = new fabric.Canvas('canvas');
 canvas.isDrawingMode = true;
-canvas.freeDrawingBrush.width = 10;
+canvas.freeDrawingBrush.width = 15;
 canvas.freeDrawingBrush.color = "#000000";
 canvas.backgroundColor = "#ffffff";
 canvas.renderAll();

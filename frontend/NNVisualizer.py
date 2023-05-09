@@ -5,15 +5,14 @@ import config
 import numpy as np
 import plotly.graph_objects as go
 import requests
-import serialization
 import streamlit as st
 from drawbox import drawbox
-from network_layout import FeedForwardNetwork, LayerSpec, Link
+from lib import serialization
+from lib.network_layout import Link
+from network import network
 from traces import link_traces, neuron_traces
 
 st.set_page_config(page_title="Visualiseur de Réseau de Neurones", layout="wide")
-
-st.write("# Visualiseur de Réseau de Neurones")
 
 st.sidebar.success("Choisissez dans le menu au-dessus.")
 
@@ -27,12 +26,7 @@ def prediction_plot(base_uri, image):
     weights_response = requests.get(urljoin(base_uri, "weights"))
     weights = json.loads(weights_response.text)
 
-    n = FeedForwardNetwork(
-        LayerSpec("Couche d'entrée", 14 * 14, marker_size=10, neurons_per_row=7 * 7),
-        LayerSpec("Couche cachée 1", 32, marker_size=16),
-        LayerSpec("Couche cachée 2", 32, marker_size=16),
-        LayerSpec("Couche de sortie", 10, marker_size=50),
-    )
+    n = network()
 
     # Map the input image and the tensor-flow prediction to a lol of floats
     n.set_activations([image.flatten()] + [np.squeeze(p) for p in prediction])
@@ -54,9 +48,8 @@ def prediction_plot(base_uri, image):
 
 drawnPixels = drawbox()
 if drawnPixels is not None:
-    print("python received value", drawnPixels)
     image = np.array(drawnPixels)
     st.sidebar.header("Image d'entrée")
     st.sidebar.image(1 - image, width=100)
     plot = prediction_plot(config.MLSERVER_BASE_URI, image)
-    st.plotly_chart(plot, use_container_width=True)
+    st.plotly_chart(plot, use_container_width=True, config=dict(displayModeBar=False))

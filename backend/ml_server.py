@@ -15,13 +15,10 @@ feature_model = keras.models.Model(
     inputs=model.input, outputs=[layer.output for layer in model.layers]
 )
 
-# Load and normalize test data
 _, (images_test, labels_test) = keras.datasets.mnist.load_data()
 
-# Resize images
-images_test = [resize(img) for img in images_test]
 # Normalize values from 0 to 1
-images_test = [img / 255 for img in images_test]
+images_test = images_test / 255
 
 
 def get_prediction_for_dataset_image(image_index):
