@@ -9,7 +9,7 @@ from network_layout import FeedForwardNetwork, LayerSpec
 from traces import link_traces, neuron_traces
 
 
-def fetch_and_display(base_uri):
+def fetch_and_display_weights(base_uri):
     response = requests.get(urljoin(base_uri, "weights"))
     weights = json.loads(response.text)
 
@@ -34,4 +34,4 @@ def fetch_and_display(base_uri):
 st.set_page_config(layout="wide")
 
 if st.sidebar.button("Afficher poids"):
-    fetch_and_display(config.MLSERVER_BASE_URI)
+    fetch_and_display_weights(config.MLSERVER_BASE_URI)

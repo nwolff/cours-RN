@@ -1,72 +1,89 @@
-      // ----------------------------------------------------
-      // Just copy/paste these functions as-is:
+////////////////////////////////////////////////////////////////////////////////
 
-      function sendMessageToStreamlitClient(type, data) {
-        var outData = Object.assign({
-          isStreamlitMessage: true,
-          type: type,
-        }, data);
-        window.parent.postMessage(outData, "*");
-      }
+function sendMessageToStreamlitClient(type, data) {
+  var outData = Object.assign({
+    isStreamlitMessage: true,
+    type: type,
+  }, data);
+  window.parent.postMessage(outData, "*");
+}
 
-      function init() {
-        sendMessageToStreamlitClient("streamlit:componentReady", {apiVersion: 1});
-      }
+function init() {
+  sendMessageToStreamlitClient("streamlit:componentReady", {apiVersion: 1});
+}
 
-      function setFrameHeight(height) {
-        sendMessageToStreamlitClient("streamlit:setFrameHeight", {height: height});
-      }
+function setFrameHeight(height) {
+  sendMessageToStreamlitClient("streamlit:setFrameHeight", {height: height});
+}
 
-      // The `data` argument can be any JSON-serializable value.
-      function sendDataToPython(data) {
-        sendMessageToStreamlitClient("streamlit:setComponentValue", data);
-      }
+// The `data` argument can be any JSON-serializable value.
+function sendDataToPython(data) {
+  sendMessageToStreamlitClient("streamlit:setComponentValue", data);
+}
 
-      // ----------------------------------------------------
-      // Now modify this part of the code to fit your needs:
+// Hook things up!
+init();
 
-       // Hook things up!
-      init();
+// Hack to autoset the iframe height.
+window.addEventListener("load", function() {
+  window.setTimeout(function() {
+    setFrameHeight(document.documentElement.clientHeight)
+  }, 0);
+});
 
-      // Hack to autoset the iframe height.
-      window.addEventListener("load", function() {
-        window.setTimeout(function() {
-          setFrameHeight(document.documentElement.clientHeight)
-        }, 0);
-      });
+// Optionally, if the automatic height computation fails you, give this component a height manually
+// by commenting out below:
+//setFrameHeight(200);
 
-      // Optionally, if the automatic height computation fails you, give this component a height manually
-      // by commenting out below:
-      //setFrameHeight(200);
+////////////////////////////////////////////////////////////////////////////////
+// The canvas drawing stuff
 
-// The canvas stuff
+// https://stackoverflow.com/questions/38048497/group-array-values-in-group-of-3-objects-in-each-array-using-underscore-js
+function groupArr(data, n) {
+    var group = [];
+    for (var i = 0, j = 0; i < data.length; i++) {
+        if (i >= n && i % n === 0)
+            j++;
+        group[j] = group[j] || [];
+        group[j].push(data[i])
+    }
+    return group;
+}
 
 function processImage(canvas) {
   // Convert on-screen image to something we can feed into our model.
+  // The dimensions of the resulting image is the size of the scaled-canvas element given in the html
   ctx = canvas.getContext('2d');
+
+  // Scale down
   const ctxScaled = document.getElementById('scaled-canvas').getContext('2d')
   ctxScaled.save();
   ctxScaled.clearRect(0, 0, ctxScaled.canvas.height, ctxScaled.canvas.width);
-  ctxScaled.scale(14.0 / ctx.canvas.width, 14.0 / ctx.canvas.height)
+  ctxScaled.scale(ctxScaled.canvas.width / ctx.canvas.width, ctxScaled.canvas.height / ctx.canvas.height)
   ctxScaled.drawImage(document.getElementById('canvas'), 0, 0)
-  const data = ctxScaled.getImageData(0, 0, 14, 14)
+  const imageData = ctxScaled.getImageData(0, 0, ctxScaled.canvas.width, ctxScaled.canvas.height)
   ctxScaled.restore();
-  return data;
+
+  // Convert to grayscale between 0 and 1
+  grayscale = [];
+  for (i = 0; i * 4 < imageData.data.length; i++) {
+    grayscale[i] = Math.round((1 - imageData.data[i * 4] / 255) * 100) / 100;
+  }
+  return groupArr(grayscale, ctxScaled.canvas.width);
 }
 
 // Canvas setup
 var canvas = new fabric.Canvas('canvas');
 canvas.isDrawingMode = true;
-canvas.freeDrawingBrush.width = 10;
-canvas.freeDrawingBrush.color = "##212529";
-canvas.opacity = 0.5;
+canvas.freeDrawingBrush.width = 12;
+canvas.freeDrawingBrush.color = "#000000";
 canvas.backgroundColor = "#ffffff";
 canvas.renderAll();
 
 // We don't want to do a prediction on every mouse move so we group
 // the predictions according to the tuning variable movesPerPrediction.
 var mouseMoveCount = 0;
-var movesPerPrediction = 25;
+var movesPerPrediction = 50;
 var drawing = false;
 
 function onMouseMove() {
@@ -91,13 +108,9 @@ $("#clear-canvas").click(function(){
 
 
 function predict(){
-  console.log("predicting");
   pixels = processImage(canvas);
-  console.log("got pixels");
   console.log(pixels);
-  sendDataToPython({
-      value: pixels,
-      dataType: "json",
-   });
+  sendDataToPython({ value: pixels});
+  console.log(pixels);
   console.log("done sending to python");
 };

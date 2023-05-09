@@ -10,7 +10,7 @@ from network_layout import FeedForwardNetwork, LayerSpec, Link
 from traces import link_traces, neuron_traces
 
 
-def fetch_and_display(base_uri):
+def fetch_and_display_weights_and_random_prediction(base_uri):
     response = requests.get(urljoin(base_uri, "predictions/random"))
     response = json.loads(response.text)
     prediction = response["prediction"]
@@ -54,4 +54,4 @@ def fetch_and_display(base_uri):
 st.set_page_config(layout="wide")
 
 if st.sidebar.button("Prédiction aléatoire"):
-    fetch_and_display(config.MLSERVER_BASE_URI)
+    fetch_and_display_weights_and_random_prediction(config.MLSERVER_BASE_URI)
