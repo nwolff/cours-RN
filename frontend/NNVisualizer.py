@@ -1,30 +1,28 @@
+import json
+from urllib.parse import urljoin
+
 import config
 import numpy as np
-from drawbox import drawbox
 import plotly.graph_objects as go
 import requests
+import serialization
 import streamlit as st
+from drawbox import drawbox
 from network_layout import FeedForwardNetwork, LayerSpec, Link
 from traces import link_traces, neuron_traces
 
-import json
-from urllib.parse import urljoin
-import serialization
-
-st.set_page_config(
-    page_title="Visualiseur de Réseau de Neurones",
-    layout="wide"
-)
+st.set_page_config(page_title="Visualiseur de Réseau de Neurones", layout="wide")
 
 st.write("# Visualiseur de Réseau de Neurones")
 
 st.sidebar.success("Choisissez dans le menu au-dessus.")
 
 
-
 def prediction_plot(base_uri, image):
     image_json = json.dumps(serialization.np_to_python(image))
-    prediction_response = requests.post(urljoin(base_uri, "predictions"), json=image_json)
+    prediction_response = requests.post(
+        urljoin(base_uri, "predictions"), json=image_json
+    )
     prediction = json.loads(prediction_response.text)
 
     weights_response = requests.get(urljoin(base_uri, "weights"))

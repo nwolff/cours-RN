@@ -5,7 +5,7 @@ import random
 
 import numpy as np
 import serialization
-from bottle import route, run, request
+from bottle import request, route, run
 from image import IMAGE_SIZE, resize
 from tensorflow import keras
 
@@ -59,7 +59,6 @@ def random_prediction():
 def prediction_for_image(image_index):
     data = get_prediction_for_dataset_image(image_index)
     return json.dumps(serialization.np_to_python(data))
-
 
 
 @route("/weights")
