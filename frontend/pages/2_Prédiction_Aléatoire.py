@@ -6,6 +6,7 @@ import numpy as np
 import plotly.graph_objects as go
 import requests
 import streamlit as st
+from lib import serialization
 from lib.network_layout import Link
 from network import network
 from traces import link_traces, neuron_traces
@@ -23,6 +24,7 @@ def fetch_and_display_weights_and_random_prediction(base_uri):
     st.sidebar.header("Image d'entrée")
     st.sidebar.image(1 - image, width=100)
     st.sidebar.text(f"(Index : {image_index})")
+    st.sidebar.write(repr(serialization.np_to_python(image)))
 
     response = requests.get(urljoin(base_uri, "weights"))
     weights = json.loads(response.text)

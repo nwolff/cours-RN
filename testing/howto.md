@@ -1,0 +1,1 @@
+http POST localhost:8888/prediction < 9-4111.json

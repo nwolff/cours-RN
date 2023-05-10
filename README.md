@@ -1,15 +1,25 @@
+## Setting up python and dependencies
+
+pyenv install 3.10.11
+cd NNVizalizer
+
+allow direnv
+
+pip install -U pip
+pip install -R dev-requirements.txt
+
 ## Training
 
-cd `backend`
-Run `./training.py`
+`cd backend`
+`./training.py`
 
 ## Running
 
-cd `backend`
-Run `./ml_server.py` to load the trained model and serve 
-the NN weights and predictions over a rest API.
+`cd backend`
+`./ml_server.py` to load the trained model and serve the NN weights and predictions over a rest API.
 
-Run `streamlit run frontend/NNVisualizer.py` for the frontend that uses the REST api.
+`cd frontend`
+`streamlit run frontend/NNVisualizer.py` for the frontend that uses the REST api.
 
 ## Developing
 

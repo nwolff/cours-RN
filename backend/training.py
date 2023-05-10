@@ -42,6 +42,6 @@ history = model.fit(
 )
 
 scores = model.evaluate(test_x, test_labels, verbose=0)
-print("Baseline Error: %.2f%%" % (100-scores[1]*100))
+print("Baseline Error: %.2f%%" % (100 - scores[1] * 100))
 
 model.save("models/digits.h5")
