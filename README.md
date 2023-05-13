@@ -18,8 +18,8 @@ pip install -R dev-requirements.txt
 `cd backend`
 `./ml_server.py` to load the trained model and serve the NN weights and predictions over a rest API.
 
-`cd frontend`
-`streamlit run frontend/NNVisualizer.py` for the frontend that uses the REST api.
+`cd streamlit`
+`streamlit run NNVisualizer.py` for the frontend that uses the REST api.
 
 ## Developing
 
