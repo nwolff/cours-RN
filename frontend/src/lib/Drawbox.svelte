@@ -3,18 +3,11 @@
 
 	import { onMount } from 'svelte';
 
-	// https://stackoverflow.com/questions/38048497/group-array-values-in-group-of-3-objects-in-each-array-using-underscore-js
-	function groupArr<Type>(data: Type[], n: number): Type[][] {
-		let group: Type[][] = [];
-		for (var i = 0, j = 0; i < data.length; i++) {
-			if (i >= n && i % n === 0) j++;
-			group[j] = group[j] || [];
-			group[j].push(data[i]);
-		}
-		return group;
-	}
+	import { createEventDispatcher } from 'svelte';
 
-	function processImage(canvas: HTMLCanvasElement): number[][] {
+	const dispatch = createEventDispatcher();
+
+	function processImage(canvas: HTMLCanvasElement): ImageData {
 		// Convert on-screen image to something we can feed into our model.
 		// The dimensions of the resulting image is the size of the scaled-canvas element given in the html
 		const ctx = canvas.getContext('2d');
@@ -33,12 +26,7 @@
 		const imageData = ctxScaled.getImageData(0, 0, ctxScaled.canvas.width, ctxScaled.canvas.height);
 		ctxScaled.restore();
 
-		// Convert to grayscale between 0 and 1
-		const grayscale: number[] = [];
-		for (let i = 0; i * 4 < imageData.data.length; i++) {
-			grayscale[i] = Math.round((1 - imageData.data[i * 4] / 255) * 100) / 100;
-		}
-		return groupArr(grayscale, ctxScaled.canvas.width);
+		return imageData; 
 	}
 
 	let canvas: fabric.Canvas;
@@ -70,9 +58,7 @@
 	function onMouseMove() {
 		if (drawing && mouseMoveCount++ > movesPerPrediction) {
 			canvas.freeDrawingBrush._finalizeAndAddPath();
-			(async () => {
-				predict();
-			})();
+			predict();
 			mouseMoveCount = 0;
 		}
 	}
@@ -84,9 +70,8 @@
 	}
 
 	function predict() {
-		const pixels = processImage(canvas);
-		console.log(pixels);
-		// XXX : Send to backend
+		const image = processImage(canvas);
+		dispatch('imageData', { image: image });
 	}
 </script>
 

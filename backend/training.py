@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
+import tensorflowjs as tfjs
 from image import IMAGE_SIZE
 from tensorflow import keras
 
@@ -45,3 +46,5 @@ scores = model.evaluate(test_x, test_labels, verbose=0)
 print("Baseline Error: %.2f%%" % (100 - scores[1] * 100))
 
 model.save("models/digits.h5")
+
+tfjs.converters.save_keras_model(model, "models")

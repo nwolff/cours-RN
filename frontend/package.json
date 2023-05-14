@@ -30,6 +30,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@tensorflow/tfjs": "^4.5.0",
 		"fabric": "^5.3.0"
 	}
 }
