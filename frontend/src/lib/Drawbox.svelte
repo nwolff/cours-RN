@@ -1,16 +1,18 @@
 <script lang="ts">
+	import { MatrixBandPart, min } from '@tensorflow/tfjs';
 	import { fabric } from 'fabric';
 
 	import { onMount } from 'svelte';
 
 	import { createEventDispatcher } from 'svelte';
+	import { object_without_properties } from 'svelte/internal';
 
 	const dispatch = createEventDispatcher();
 
-	function processImage(canvas: HTMLCanvasElement): ImageData {
+	function processImage(canvas: fabric.Canvas): ImageData {
 		// Convert on-screen image to something we can feed into our model.
 		// The dimensions of the resulting image is the size of the scaled-canvas element given in the html
-		const ctx = canvas.getContext('2d');
+		const ctx = canvas.getContext();
 
 		// Scale down
 		const ctxScaled = document
@@ -69,10 +71,32 @@
 		canvas.renderAll();
 	}
 
+	function computeBoundingRect(canvas: fabric.Canvas) {
+  		let minX = Number.MAX_VALUE;
+  		let minY = Number.MAX_VALUE;
+  		let maxX = -Number.MAX_VALUE;
+  		let maxY = -Number.MAX_VALUE;
+		for(const obj of canvas.getObjects()) {
+			minX = Math.min(minX, obj.left);
+			minY = Math.min(minY, obj.top);
+			maxX = Math.max(maxX, obj.left + obj.width);
+			maxY = Math.max(maxY, obj.top + obj.height);
+		};
+		return {
+    		x: minX,
+    		y: minY,
+    		width: maxX - minX,
+    		height: maxY - minY,
+  		};
+	}
+
 	function predict() {
+		console.log("predict");
+		console.log(computeBoundingRect(canvas));
 		const image = processImage(canvas);
 		dispatch('imageData', { image: image });
 	}
+
 </script>
 
 <div>
