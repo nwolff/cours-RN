@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { MatrixBandPart, min } from '@tensorflow/tfjs';
 	import { fabric } from 'fabric';
 
 	import { onMount } from 'svelte';
 
 	import { createEventDispatcher } from 'svelte';
-	import { object_without_properties } from 'svelte/internal';
 
 	const dispatch = createEventDispatcher();
 
@@ -28,7 +26,7 @@
 		const imageData = ctxScaled.getImageData(0, 0, ctxScaled.canvas.width, ctxScaled.canvas.height);
 		ctxScaled.restore();
 
-		return imageData; 
+		return imageData;
 	}
 
 	let canvas: fabric.Canvas;
@@ -72,50 +70,52 @@
 	}
 
 	function computeBoundingRect(canvas: fabric.Canvas) {
-  		let minX = Number.MAX_VALUE;
-  		let minY = Number.MAX_VALUE;
-  		let maxX = -Number.MAX_VALUE;
-  		let maxY = -Number.MAX_VALUE;
-		for(const obj of canvas.getObjects()) {
+		let minX = Number.MAX_VALUE;
+		let minY = Number.MAX_VALUE;
+		let maxX = -Number.MAX_VALUE;
+		let maxY = -Number.MAX_VALUE;
+		for (const obj of canvas.getObjects()) {
 			minX = Math.min(minX, obj.left);
 			minY = Math.min(minY, obj.top);
 			maxX = Math.max(maxX, obj.left + obj.width);
 			maxY = Math.max(maxY, obj.top + obj.height);
-		};
+		}
+		// Now some clamping because fabric lets the user draw outside
+		minX = Math.max(0, minX);
+		minY = Math.max(0, minY);
+		maxX = Math.min(maxX, canvas.width);
+		maxY = Math.min(maxY, canvas.height);
+
 		return {
-    		x: minX,
-    		y: minY,
-    		width: maxX - minX,
-    		height: maxY - minY,
-  		};
+			x: minX,
+			y: minY,
+			width: maxX - minX,
+			height: maxY - minY
+		};
 	}
 
 	function predict() {
-		console.log("predict");
+		console.log('predict');
 		console.log(computeBoundingRect(canvas));
 		const image = processImage(canvas);
 		dispatch('imageData', { image: image });
 	}
-
 </script>
 
-<div>
+<div class="numbers with-normalizer">
 	<div class="input-canvas-wrapper">
-		<canvas id="canvas" width="140" height="140" />
+		<canvas class="drawcanvas" id="canvas" width="140" height="140" />
 	</div>
 	<button id="clear-canvas" on:click={clearCanvas}>Effacer</button>
 	<canvas id="scaled-canvas" style="display:none" width="28" height="28" />
 </div>
 
 <style>
-	.input-canvas-wrapper {
-		width: 140;
-		height: 140;
+	.numbers .input-canvas-wrapper {
+		width: 140px;
+		height: 140px;
 		border: 8px dashed #666;
 		border-radius: 8px;
 		box-sizing: content-box;
-	}
-	.input-canvas-wrapper > canvas {
-		touch-action: none;
 	}
 </style>
