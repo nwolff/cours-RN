@@ -2,10 +2,10 @@
 	import Drawbox from '$lib/Drawbox.svelte';
 
 	import * as tf from '@tensorflow/tfjs';
+	import * as tfvis from '@tensorflow/tfjs-vis';
 
 	export let data;
 	let model: tf.LayersModel = data.model;
-	let prediction: tf.Tensor;
 	let processedImage: tf.Tensor;
 
 	function handleDrawnImage(event: { detail: { image: ImageData } }) {
@@ -21,15 +21,18 @@
 				.mul(-1)
 				.add(1)
 		);
-		const res = model.predict(processedImage);
-		if (!Array.isArray(res)) {
-			prediction = res;
+		const prediction = tf.squeeze(model.predict(processedImage)).dataSync();
+		const surface = document.getElementById('prediction');
+		const barchartData = [];
+		for (const [index, value] of prediction.entries()) {
+			barchartData.push({ index: index, value: value });
 		}
+		tfvis.render.barchart(surface, barchartData, { fontSize: 20 });
 	}
-
 </script>
 
 <Drawbox on:imageData={handleDrawnImage} />
 
 <div>{processedImage}</div>
-<div>{prediction}</div>
+
+<div id="prediction" />
