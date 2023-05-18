@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { getModel, loadData } from '$lib/model.js';
-
 	import { onMount } from 'svelte';
 
 	import * as tf from '@tensorflow/tfjs';
@@ -11,13 +9,14 @@
 
 	import type { MnistData } from '$lib/data.js';
 
-	let model = getModel();
+	import { mnistDataStore, modelStore } from '../../stores';
+	import { getModel } from '$lib/model';
+
 	let data: MnistData;
 	let isLoading = true;
 
 	onMount(async () => {
-		const dataPromise = loadData();
-		dataPromise.then((value) => {
+		mnistDataStore.load().then((value) => {
 			isLoading = false;
 			data = value;
 		});
@@ -25,17 +24,17 @@
 
 	async function train(model: tf.Sequential, data: MnistData, fitCallbacks) {
 		const BATCH_SIZE = 64;
-		const trainDataSize = 500;
-		const testDataSize = 100;
+		const trainDataSize = 5000;
+		const testDataSize = 1000;
 
 		const [trainXs, trainYs] = tf.tidy(() => {
 			const d = data.nextTrainBatch(trainDataSize);
-			return [d.xs.reshape([trainDataSize, 28, 28, 1]), d.labels];
+			return [d.xs.reshape([trainDataSize, 28 * 28]), d.labels];
 		});
 
 		const [testXs, testYs] = tf.tidy(() => {
 			const d = data.nextTestBatch(testDataSize);
-			return [d.xs.reshape([testDataSize, 28, 28, 1]), d.labels];
+			return [d.xs.reshape([testDataSize, 28 * 28]), d.labels];
 		});
 
 		return model.fit(trainXs, trainYs, {
@@ -48,7 +47,7 @@
 	}
 
 	async function watchTraining() {
-		model = getModel(); // Restart from scratch esch time
+		modelStore.update(() => getModel());
 		const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
 		const container = {
 			name: 'show.fitCallbacks',
@@ -56,7 +55,7 @@
 			styles: { height: '1000px' }
 		};
 		const callbacks = tfvis.show.fitCallbacks(container, metrics);
-		return train(model, data, callbacks);
+		return train($modelStore, data, callbacks);
 	}
 </script>
 
@@ -105,7 +104,7 @@
 
 					function doPrediction(testDataSize = 500) {
 						const testData = data.nextTestBatch(testDataSize);
-						const testxs = testData.xs.reshape([testDataSize, 28, 28, 1]);
+						const testxs = testData.xs.reshape([testDataSize, 28 * 28, 1]);
 						const labels = testData.labels.argMax([-1]);
 						const preds = model.predict(testxs).argMax([-1]);
 

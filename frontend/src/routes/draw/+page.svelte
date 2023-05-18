@@ -4,8 +4,8 @@
 	import * as tf from '@tensorflow/tfjs';
 	import * as tfvis from '@tensorflow/tfjs-vis';
 
-	export let data;
-	let model: tf.LayersModel = data.model;
+	import { mnistDataStore, modelStore } from '../../stores';
+
 	let processedImage: tf.Tensor;
 
 	function handleDrawnImage(event: { detail: { image: ImageData } }) {
@@ -21,7 +21,7 @@
 				.mul(-1)
 				.add(1)
 		);
-		const prediction = tf.squeeze(model.predict(processedImage)).dataSync();
+		const prediction = tf.squeeze($modelStore.predict(processedImage)).dataSync();
 		const surface = document.getElementById('prediction');
 		const barchartData = [];
 		for (const [index, value] of prediction.entries()) {
