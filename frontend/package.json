@@ -34,9 +34,10 @@
 	"type": "module",
 	"dependencies": {
 		"@square/svelte-store": "^1.0.15",
+		"@svelteuidev/composables": "^0.12.1",
+		"@svelteuidev/core": "^0.12.1",
 		"@tensorflow/tfjs": "^4.5.0",
 		"@tensorflow/tfjs-vis": "^1.5.1",
-		"fabric": "^5.3.0",
-		"svelte-loading-spinners": "^0.3.4"
+		"fabric": "^5.3.0"
 	}
 }

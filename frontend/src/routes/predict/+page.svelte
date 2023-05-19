@@ -7,9 +7,9 @@
 
 	import { onMount } from 'svelte';
 
-	let tfvis;
+	import { Space } from '@svelteuidev/core';
 
-	let processedImage: tf.Tensor;
+	let tfvis;
 
 	onMount(async () => {
 		tfvis = await import('@tensorflow/tfjs-vis');
@@ -21,7 +21,7 @@
 		const image = event.detail.image;
 		const pixels = tf.browser.fromPixels(image, 1);
 		// https://github.com/tensorflow/tfjs-examples/blob/master/webcam-transfer-learning/index.js
-		processedImage = tf.tidy(() =>
+		const processedImage = tf.tidy(() =>
 			tf
 				.reshape(pixels, [1, 28 * 28])
 				.toFloat()
@@ -35,7 +35,7 @@
 			barchartData.push({ index: index, value: value });
 		}
 		const surface = document.getElementById('prediction-js');
-		tfvis.render.barchart(surface, barchartData, { fontSize: 15 });
+		tfvis.render.barchart(surface, barchartData, { fontSize: 15, height: 200, width: 400 });
 
 		const predictionPython = tf.squeeze($pythonModelStore.predict(processedImage)).dataSync();
 		const barchartDataPython = [];
@@ -43,14 +43,21 @@
 			barchartDataPython.push({ index: index, value: value });
 		}
 		const surfacePython = document.getElementById('prediction-python');
-		tfvis.render.barchart(surfacePython, barchartDataPython, { fontSize: 15, color: 'green' });
+		tfvis.render.barchart(surfacePython, barchartDataPython, {
+			fontSize: 15,
+			height: 200,
+			width: 400,
+			color: 'green'
+		});
 	}
 </script>
 
 <Drawbox on:imageData={handleDrawnImage} />
 
-<div>{processedImage}</div>
+<Space h="lg" />
 
 <div id="prediction-js" />
+
+<Space h="lg" />
 
 <div id="prediction-python" />

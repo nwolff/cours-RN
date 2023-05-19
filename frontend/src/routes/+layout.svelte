@@ -1,17 +1,16 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import { Wave } from 'svelte-loading-spinners';
-	import { navigating } from '$app/stores';
+	import { Stack, Anchor, AppShell, Navbar, Container } from '@svelteuidev/core';
 </script>
 
-<nav>
-	<a href="{base}/">Home</a>
-	<a href="{base}/train">Train</a>
-	<a href="{base}/draw">Draw</a>
-</nav>
+<AppShell>
+	<Navbar slot="navbar" width={{ base: '100%', sm: 100 }}>
+		<Stack>
+			<Anchor href="{base}/">Accueil</Anchor>
+			<Anchor href="{base}/train">Entrainer</Anchor>
+			<Anchor href="{base}/predict">Prédire</Anchor>
+		</Stack>
+	</Navbar>
 
-{#if $navigating}
-	<Wave size="60" color="#FF3E00" unit="px" duration="1s" />
-{:else}
 	<slot />
-{/if}
+</AppShell>

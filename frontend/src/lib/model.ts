@@ -3,20 +3,17 @@ import { MnistData } from './data';
 
 export function getModel() {
 	const model = tf.sequential();
-	model.add(tf.layers.inputLayer({ inputShape: [28 * 28] }));
-	model.add(tf.layers.dense({ units: 32, activation: 'relu' }));
+	model.add(tf.layers.dense({ inputShape: [28 * 28], units: 32, activation: 'relu' }));
 	model.add(tf.layers.dense({ units: 32, activation: 'relu' }));
 	model.add(tf.layers.dense({ units: 10, activation: 'softmax' }));
 
-	const LEARNING_RATE = 0.15;
+	const optimizer = tf.train.adam();
 
 	model.compile({
-		optimizer: tf.train.sgd(LEARNING_RATE),
+		optimizer: optimizer,
 		loss: 'categoricalCrossentropy',
 		metrics: ['accuracy']
 	});
-
-	model.summary(); // XXX
 
 	return model;
 }

@@ -1,2 +1,8 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script type="ts">
+	import { Title, Text } from '@svelteuidev/core';
+</script>
+
+<Title order={1}>Intelligence Artificielle</Title>
+<p>
+	<Text>Définir, entraîner, vérifier, prédire</Text>
+</p>

@@ -5,6 +5,8 @@
 
 	import { createEventDispatcher } from 'svelte';
 
+	import { Button, Group } from '@svelteuidev/core';
+
 	const dispatch = createEventDispatcher();
 
 	function processImage(canvas: fabric.Canvas): ImageData {
@@ -103,11 +105,15 @@
 </script>
 
 <div class="numbers with-normalizer">
-	<div class="input-canvas-wrapper">
-		<canvas class="drawcanvas" id="canvas" width="140" height="140" />
-	</div>
-	<button id="clear-canvas" on:click={clearCanvas}>Effacer</button>
-	<canvas id="scaled-canvas" style="display:none" width="28" height="28" />
+	<Group>
+		<div class="input-canvas-wrapper">
+			<canvas class="drawcanvas" id="canvas" width="140" height="140" />
+		</div>
+		<canvas id="scaled-canvas" style="display:none" width="28" height="28" />
+		<p>
+			<Button id="clear-canvas" on:click={clearCanvas}>Effacer</Button>
+		</p>
+	</Group>
 </div>
 
 <style>
