@@ -5,6 +5,8 @@
 		<link rel="icon" href="./favicon.png" />
 		<meta name="viewport" content="width=device-width" />
 		<meta http-equiv="content-security-policy" content="">
+		<link href="./_app/immutable/assets/3.b14adbf3.css" rel="stylesheet">
+		<link href="./_app/immutable/assets/stores.bd53f61f.css" rel="stylesheet">
 		<link rel="modulepreload" href="./_app/immutable/entry/start.e998d796.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/index.ebc08152.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/singletons.6ef7a90b.js">
@@ -13,7 +15,8 @@
 		<link rel="modulepreload" href="./_app/immutable/chunks/preload-helper.41c905a7.js">
 		<link rel="modulepreload" href="./_app/immutable/nodes/0.0b430837.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/stitches.config.236b0e80.js">
-		<link rel="modulepreload" href="./_app/immutable/nodes/2.4833e35b.js">
+		<link rel="modulepreload" href="./_app/immutable/nodes/3.743c6f79.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/stores.df143790.js">
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">
@@ -58,8 +61,21 @@
 
 
 	<a class="svelteui-c-hgRUNz svelteui-Anchor-root svelteui-c-hgRUNz svelteui-c-hgRUNz-iPJLV-css svelteui-c-hmzreu svelteui-Text-root svelteui-c-hmzreu svelteui-c-hmzreu-iPJLV-css svelteui-c-PJLV svelteui-c-PJLV-iPJLV-css" href="/NN-Visualizer/predict">Prédire</a></div></nav>
-			<main class="svelteui-c-THQGi svelteui-AppShell-main"><h1>Intelligence Artificielle</h1>
-<p>Définir, entraîner, vérifier, prédire</p></main>
+			<main class="svelteui-c-THQGi svelteui-AppShell-main"><div class="numbers with-normalizer svelte-1na61ny"><div class="input-canvas-wrapper svelte-1na61ny"><canvas class="drawcanvas" id="canvas" width="140" height="140"></canvas></div>
+	<canvas id="scaled-canvas" style="display:none" width="28" height="28"></canvas>
+	<p>
+
+
+
+<button class="svelteui-c-dMSFfW svelteui-Button-root svelteui-c-dMSFfW svelteui-c-dMSFfW-bJPiIq-variation-filled svelteui-c-dMSFfW-iPJLV-css   svelte-5xpm5q" id="clear-canvas" tabindex="0">
+		Effacer
+		
+		</button></p>
+</div>
+
+<div id="prediction-js"></div>
+
+<div id="prediction-python"></div></main>
 			</div>
 		</div></div>
 
@@ -82,7 +98,7 @@
 						import("./_app/immutable/entry/app.7c2e65d0.js")
 					]).then(([kit, app]) => {
 						kit.start(app, element, {
-							node_ids: [0, 2],
+							node_ids: [0, 3],
 							data,
 							form: null,
 							error: null
