@@ -32,7 +32,7 @@
 	let canvas: fabric.Canvas;
 	let mouseMoveCount = 0;
 	let drawing = false;
-	const movesPerPrediction = 50;
+	const movesPerPrediction = 20;
 
 	onMount(() => {
 		// Canvas setup

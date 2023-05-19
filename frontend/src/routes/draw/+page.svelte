@@ -3,7 +3,7 @@
 
 	import * as tf from '@tensorflow/tfjs';
 
-	import { mnistDataStore, modelStore } from '../../stores';
+	import { modelStore, pythonModelStore } from '../../stores';
 
 	import { onMount } from 'svelte';
 
@@ -13,6 +13,7 @@
 
 	onMount(async () => {
 		tfvis = await import('@tensorflow/tfjs-vis');
+		await pythonModelStore.load();
 	});
 
 	function handleDrawnImage(event: { detail: { image: ImageData } }) {
@@ -29,12 +30,20 @@
 				.add(1)
 		);
 		const prediction = tf.squeeze($modelStore.predict(processedImage)).dataSync();
-		const surface = document.getElementById('prediction');
 		const barchartData = [];
 		for (const [index, value] of prediction.entries()) {
 			barchartData.push({ index: index, value: value });
 		}
-		tfvis.render.barchart(surface, barchartData, { fontSize: 20 });
+		const surface = document.getElementById('prediction-js');
+		tfvis.render.barchart(surface, barchartData, { fontSize: 15 });
+
+		const predictionPython = tf.squeeze($pythonModelStore.predict(processedImage)).dataSync();
+		const barchartDataPython = [];
+		for (const [index, value] of predictionPython.entries()) {
+			barchartDataPython.push({ index: index, value: value });
+		}
+		const surfacePython = document.getElementById('prediction-python');
+		tfvis.render.barchart(surfacePython, barchartDataPython, { fontSize: 15, color: 'green' });
 	}
 </script>
 
@@ -42,4 +51,6 @@
 
 <div>{processedImage}</div>
 
-<div id="prediction" />
+<div id="prediction-js" />
+
+<div id="prediction-python" />
