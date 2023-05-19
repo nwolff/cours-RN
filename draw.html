@@ -5,17 +5,42 @@
 		<link rel="icon" href="./favicon.png" />
 		<meta name="viewport" content="width=device-width" />
 		<meta http-equiv="content-security-policy" content="">
-		<link rel="modulepreload" href="./_app/immutable/entry/start.82391b01.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/index.509146bb.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/singletons.16000aff.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/paths.515ff18f.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/app.0260b795.js">
+		<link href="./_app/immutable/assets/ArrowUp.ab04f6cd.css" rel="stylesheet">
+		<link href="./_app/immutable/assets/3.b14adbf3.css" rel="stylesheet">
+		<link rel="modulepreload" href="./_app/immutable/entry/start.510a132f.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/index.2f543cb9.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/singletons.f4efa22a.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/index.777404fd.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.25af790f.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/preload-helper.41c905a7.js">
+		<link rel="modulepreload" href="./_app/immutable/nodes/0.b7b9994c.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/ArrowUp.svelte_svelte_type_style_lang.b6a07f07.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/stores.c1b2cd48.js">
+		<link rel="modulepreload" href="./_app/immutable/nodes/3.11f43ab2.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/stores.43a38518.js">
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">
+
+
+<nav><a href="/NN-Visualizer/">Home</a>
+	<a href="/NN-Visualizer/train">Train</a>
+	<a href="/NN-Visualizer/draw">Draw</a></nav>
+
+<div class="numbers with-normalizer svelte-1na61ny"><div class="input-canvas-wrapper svelte-1na61ny"><canvas class="drawcanvas" id="canvas" width="140" height="140"></canvas></div>
+	<button id="clear-canvas">Effacer</button>
+	<canvas id="scaled-canvas" style="display:none" width="28" height="28"></canvas>
+</div>
+
+<div>undefined</div>
+
+<div id="prediction"></div>
+
+
+			
 			<script>
 				{
-					__sveltekit_1fuz7kg = {
+					__sveltekit_6jwujf = {
 						assets: "/NN-Visualizer",
 						base: new URL(".", location).pathname.slice(0, -1),
 						env: {}
@@ -23,11 +48,18 @@
 
 					const element = document.currentScript.parentElement;
 
+					const data = [null,null];
+
 					Promise.all([
-						import("./_app/immutable/entry/start.82391b01.js"),
-						import("./_app/immutable/entry/app.0260b795.js")
+						import("./_app/immutable/entry/start.510a132f.js"),
+						import("./_app/immutable/entry/app.25af790f.js")
 					]).then(([kit, app]) => {
-						kit.start(app, element);
+						kit.start(app, element, {
+							node_ids: [0, 3],
+							data,
+							form: null,
+							error: null
+						});
 					});
 				}
 			</script>
