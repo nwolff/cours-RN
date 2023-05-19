@@ -7,17 +7,17 @@
 		<meta http-equiv="content-security-policy" content="">
 		<link href="./_app/immutable/assets/ArrowUp.ab04f6cd.css" rel="stylesheet">
 		<link href="./_app/immutable/assets/3.b14adbf3.css" rel="stylesheet">
-		<link rel="modulepreload" href="./_app/immutable/entry/start.510a132f.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/start.0e11443a.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/index.2f543cb9.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/singletons.f4efa22a.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/index.777404fd.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/app.25af790f.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/singletons.413dd61f.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/paths.7ada80ab.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.03702937.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/preload-helper.41c905a7.js">
-		<link rel="modulepreload" href="./_app/immutable/nodes/0.b7b9994c.js">
+		<link rel="modulepreload" href="./_app/immutable/nodes/0.76cc702f.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/ArrowUp.svelte_svelte_type_style_lang.b6a07f07.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/stores.c1b2cd48.js">
-		<link rel="modulepreload" href="./_app/immutable/nodes/3.11f43ab2.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/stores.43a38518.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/stores.2813046f.js">
+		<link rel="modulepreload" href="./_app/immutable/nodes/3.2d3dfcae.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/stores.ec498b9a.js">
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">
@@ -34,13 +34,15 @@
 
 <div>undefined</div>
 
-<div id="prediction"></div>
+<div id="prediction-js"></div>
+
+<div id="prediction-python"></div>
 
 
 			
 			<script>
 				{
-					__sveltekit_6jwujf = {
+					__sveltekit_dboy5x = {
 						assets: "/NN-Visualizer",
 						base: new URL(".", location).pathname.slice(0, -1),
 						env: {}
@@ -51,8 +53,8 @@
 					const data = [null,null];
 
 					Promise.all([
-						import("./_app/immutable/entry/start.510a132f.js"),
-						import("./_app/immutable/entry/app.25af790f.js")
+						import("./_app/immutable/entry/start.0e11443a.js"),
+						import("./_app/immutable/entry/app.03702937.js")
 					]).then(([kit, app]) => {
 						kit.start(app, element, {
 							node_ids: [0, 3],
