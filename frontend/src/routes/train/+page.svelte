@@ -25,6 +25,7 @@
 	});
 
 	async function train(model: tf.Sequential, data: MnistData, fitCallbacks) {
+		const EPOCHS = 10;
 		const BATCH_SIZE = 64;
 		const trainDataSize = 5000;
 		const testDataSize = 1000;
@@ -42,7 +43,7 @@
 		return model.fit(trainXs, trainYs, {
 			batchSize: BATCH_SIZE,
 			validationData: [testXs, testYs],
-			epochs: 10,
+			epochs: EPOCHS,
 			shuffle: true,
 			callbacks: fitCallbacks
 		});
@@ -58,6 +59,63 @@
 		};
 		const callbacks = tfvis.show.fitCallbacks(container, metrics);
 		return train($modelStore, data, callbacks);
+	}
+
+	const classNames = [
+		'Zero',
+		'Un',
+		'Deux',
+		'Trois',
+		'Quatre',
+		'Cinq',
+		'Six',
+		'Sept',
+		'Huit',
+		'Neuf'
+	];
+	function doPrediction(model: tf.Sequential, testDataSize = 500) {
+		const testData = data.nextTestBatch(testDataSize);
+		const testxs = testData.xs.reshape([testDataSize, 28 * 28]);
+		const labels = testData.labels.argMax([-1]);
+		const preds = model.predict(testxs).argMax([-1]);
+
+		testxs.dispose();
+		return [preds, labels];
+	}
+
+	async function showAccuracy() {
+		const [preds, labels] = doPrediction($modelStore);
+		const accuracy = await tfvis.metrics.accuracy(labels, preds);
+		const container = { name: 'Accuracy', tab: 'Evaluation' };
+		console.log(accuracy);
+
+		labels.dispose();
+	}
+
+	async function showPerClassAccuracy() {
+		const [preds, labels] = doPrediction($modelStore);
+		const perClassAccuracy = await tfvis.metrics.perClassAccuracy(labels, preds);
+		const container = { name: 'Per Class Accuracy', tab: 'Evaluation' };
+		tfvis.show.perClassAccuracy(container, perClassAccuracy, classNames);
+
+		labels.dispose();
+	}
+
+	async function showConfusionMatrix() {
+		const [preds, labels] = doPrediction($modelStore);
+		const confusionMatrix = await tfvis.metrics.confusionMatrix(labels, preds);
+		const container = { name: 'Confusion Matrix', tab: 'Evaluation' };
+		tfvis.render.confusionMatrix(container, {
+			values: confusionMatrix,
+			tickLabels: classNames
+		});
+
+		labels.dispose();
+	}
+
+	async function showModelSummary() {
+		const container = { name: 'Model Summary', tab: 'Model Inspection' };
+		tfvis.show.modelSummary(container, $modelStore);
 	}
 </script>
 
@@ -86,62 +144,17 @@
 				demonstrated below.
 			</p>
 
-			<p><button id="show-accuracy">Show per-class accuracy</button></p>
-			<p><button id="show-confusion">Show confusion matrix</button></p>
-
-			<script class="show-script">
-				{
-					const classNames = [
-						'Zero',
-						'One',
-						'Two',
-						'Three',
-						'Four',
-						'Five',
-						'Six',
-						'Seven',
-						'Eight',
-						'Nine'
-					];
-
-					function doPrediction(testDataSize = 500) {
-						const testData = data.nextTestBatch(testDataSize);
-						const testxs = testData.xs.reshape([testDataSize, 28 * 28, 1]);
-						const labels = testData.labels.argMax([-1]);
-						const preds = model.predict(testxs).argMax([-1]);
-
-						testxs.dispose();
-						return [preds, labels];
-					}
-
-					async function showAccuracy() {
-						const [preds, labels] = doPrediction();
-						const classAccuracy = await tfvis.metrics.perClassAccuracy(labels, preds);
-						const container = { name: 'Accuracy', tab: 'Evaluation' };
-						tfvis.show.perClassAccuracy(container, classAccuracy, classNames);
-
-						labels.dispose();
-					}
-
-					async function showConfusion() {
-						const [preds, labels] = doPrediction();
-						const confusionMatrix = await tfvis.metrics.confusionMatrix(labels, preds);
-						const container = { name: 'Confusion Matrix', tab: 'Evaluation' };
-						tfvis.render.confusionMatrix(container, {
-							values: confusionMatrix,
-							tickLabels: classNames
-						});
-
-						labels.dispose();
-					}
-
-					document.querySelector('#show-accuracy').addEventListener('click', () => showAccuracy());
-
-					document
-						.querySelector('#show-confusion')
-						.addEventListener('click', () => showConfusion());
-				}
-			</script>
+			<p>
+				<button id="show-model-summary" on:click={showModelSummary}>Show Model Summary</button>
+			</p>
+			<p>
+				<button id="show-per-class-accuracy" on:click={showPerClassAccuracy}
+					>Show per-class accuracy</button
+				>
+			</p>
+			<p>
+				<button id="show-confusion" on:click={showConfusionMatrix}>Show confusion matrix</button>
+			</p>
 		</section>
 	</article>
 {/if}
