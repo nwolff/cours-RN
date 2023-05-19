@@ -5,8 +5,6 @@
 
 	import { Wave } from 'svelte-loading-spinners';
 
-	import * as tfvis from '@tensorflow/tfjs-vis';
-
 	import type { MnistData } from '$lib/data.js';
 
 	import { mnistDataStore, modelStore } from '../../stores';
@@ -15,7 +13,11 @@
 	let data: MnistData;
 	let isLoading = true;
 
+	let tfvis;
+
 	onMount(async () => {
+		tfvis = await import('@tensorflow/tfjs-vis');
+
 		mnistDataStore.load().then((value) => {
 			isLoading = false;
 			data = value;

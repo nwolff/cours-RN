@@ -2,11 +2,18 @@
 	import Drawbox from '$lib/Drawbox.svelte';
 
 	import * as tf from '@tensorflow/tfjs';
-	import * as tfvis from '@tensorflow/tfjs-vis';
 
 	import { mnistDataStore, modelStore } from '../../stores';
 
+	import { onMount } from 'svelte';
+
+	let tfvis;
+
 	let processedImage: tf.Tensor;
+
+	onMount(async () => {
+		tfvis = await import('@tensorflow/tfjs-vis');
+	});
 
 	function handleDrawnImage(event: { detail: { image: ImageData } }) {
 		console.log('got image');
