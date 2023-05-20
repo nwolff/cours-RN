@@ -1,10 +1,6 @@
 <script lang="ts">
 	import { fabric } from 'fabric';
-
-	import { onMount } from 'svelte';
-
-	import { createEventDispatcher } from 'svelte';
-
+	import { onMount, createEventDispatcher } from 'svelte';
 	import { Button, Group } from '@svelteuidev/core';
 
 	const dispatch = createEventDispatcher();

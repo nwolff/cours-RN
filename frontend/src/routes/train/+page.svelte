@@ -117,7 +117,7 @@
 </script>
 
 {#if isLoading}
-	<Loader size="lg" />
+	<Loader size="xl" />
 {:else}
 	<Title order="2">Entraîner notre modèle</Title>
 	<p>

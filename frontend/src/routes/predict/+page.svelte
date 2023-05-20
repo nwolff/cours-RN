@@ -1,20 +1,13 @@
 <script lang="ts">
 	import Drawbox from '$lib/Drawbox.svelte';
-
 	import * as tf from '@tensorflow/tfjs';
-
 	import { modelStore, pythonModelStore } from '../../stores';
-
-	import { onMount } from 'svelte';
-
 	import { Space } from '@svelteuidev/core';
+	import type { VegaLiteSpec } from 'svelte-vega';
+	import { VegaLite } from 'svelte-vega';
 
-	let tfvis;
-
-	onMount(async () => {
-		tfvis = await import('@tensorflow/tfjs-vis');
-		await pythonModelStore.load();
-	});
+	let barchartData: Record<number, number>;
+	let pythonBarchartData: Record<number, number>;
 
 	function handleDrawnImage(event: { detail: { image: ImageData } }) {
 		console.log('got image');
@@ -30,34 +23,55 @@
 				.add(1)
 		);
 		const prediction = tf.squeeze($modelStore.predict(processedImage)).dataSync();
-		const barchartData = [];
+		const rows = [];
 		for (const [index, value] of prediction.entries()) {
-			barchartData.push({ index: index, value: value });
+			rows.push({ index: index, value: value });
 		}
-		const surface = document.getElementById('prediction-js');
-		tfvis.render.barchart(surface, barchartData, { fontSize: 15, height: 200, width: 400 });
+		barchartData = { table: rows };
 
 		const predictionPython = tf.squeeze($pythonModelStore.predict(processedImage)).dataSync();
-		const barchartDataPython = [];
+		let pythonRows = [];
 		for (const [index, value] of predictionPython.entries()) {
-			barchartDataPython.push({ index: index, value: value });
+			pythonRows.push({ index: index, value: value });
 		}
-		const surfacePython = document.getElementById('prediction-python');
-		tfvis.render.barchart(surfacePython, barchartDataPython, {
-			fontSize: 15,
-			height: 200,
-			width: 400,
-			color: 'green'
-		});
+		pythonBarchartData = { table: pythonRows };
 	}
+
+	const visualizationSpec: VegaLiteSpec = {
+		$schema: 'https://vega.github.io/schema/vega-lite/v4.json',
+		width: 350,
+		height: 170,
+		data: {
+			name: 'table'
+		},
+		mark: 'bar',
+		encoding: {
+			x: {
+				field: 'index',
+				type: 'nominal',
+				title: null,
+				axis: { labelFontSize: 14, labelAngle: 0, ticks: false }
+			},
+			y: {
+				field: 'value',
+				type: 'quantitative',
+				title: null,
+				scale: { domain: [0, 1] },
+				axis: { labelFontSize: 14 }
+			}
+		}
+	};
+
+	const pythonVisualizationSpec: VegaLiteSpec = JSON.parse(JSON.stringify(visualizationSpec));
+	pythonVisualizationSpec.encoding.color = { value: 'green' };
 </script>
 
 <Drawbox on:imageData={handleDrawnImage} />
 
 <Space h="lg" />
 
-<div id="prediction-js" />
+<VegaLite data={barchartData} spec={visualizationSpec} options={{ actions: false }} />
 
 <Space h="lg" />
 
-<div id="prediction-python" />
+<VegaLite data={pythonBarchartData} spec={pythonVisualizationSpec} options={{ actions: false }} />
