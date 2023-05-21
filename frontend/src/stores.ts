@@ -12,7 +12,12 @@ export const mnistDataStore = asyncReadable(null, async () => {
 
 export const modelStore = writable(getModel());
 
-export const pythonModelStore = asyncReadable(null, async () => {
-	const modelUrl = base + '/model.json';
+export const twoHiddenLayersModelStore = asyncReadable(null, async () => {
+	const modelUrl = base + '/two_hidden_layers/model.json';
+	return await tf.loadLayersModel(modelUrl);
+});
+
+export const leNetModelStore = asyncReadable(null, async () => {
+	const modelUrl = base + '/le_net/model.json';
 	return await tf.loadLayersModel(modelUrl);
 });

@@ -1,19 +1,29 @@
 <script lang="ts">
 	import Drawbox from '$lib/Drawbox.svelte';
 	import * as tf from '@tensorflow/tfjs';
-	import { modelStore, pythonModelStore } from '../../stores';
+	import { modelStore, twoHiddenLayersModelStore, leNetModelStore } from '../../stores';
 	import { Space } from '@svelteuidev/core';
 	import type { VegaLiteSpec } from 'svelte-vega';
 	import { VegaLite } from 'svelte-vega';
 
-	let barchartData: Record<number, number>;
-	let pythonBarchartData: Record<number, number>;
+	let barchartData: { table: { index: number; value: number }[] };
+	let twoHiddenLayersBarchartData: { table: { index: number; value: number }[] };
+	let leNetBarchartData: { table: { index: number; value: number }[] };
+
+	function predictionToBarchartData(prediction: Float32Array) {
+		const rows = [];
+		for (const [index, value] of prediction.entries()) {
+			rows.push({ index: index, value: value });
+		}
+		return { table: rows };
+	}
 
 	function handleDrawnImage(event: { detail: { image: ImageData } }) {
 		console.log('got image');
 		const image = event.detail.image;
 		const pixels = tf.browser.fromPixels(image, 1);
-		// https://github.com/tensorflow/tfjs-examples/blob/master/webcam-transfer-learning/index.js
+
+		// From: https://github.com/tensorflow/tfjs-examples/blob/master/webcam-transfer-learning/index.js
 		const processedImage = tf.tidy(() =>
 			tf
 				.reshape(pixels, [1, 28 * 28])
@@ -23,24 +33,34 @@
 				.add(1)
 		);
 		const prediction = tf.squeeze($modelStore.predict(processedImage)).dataSync();
-		const rows = [];
-		for (const [index, value] of prediction.entries()) {
-			rows.push({ index: index, value: value });
-		}
-		barchartData = { table: rows };
+		barchartData = predictionToBarchartData(prediction);
 
-		const predictionPython = tf.squeeze($pythonModelStore.predict(processedImage)).dataSync();
-		let pythonRows = [];
-		for (const [index, value] of predictionPython.entries()) {
-			pythonRows.push({ index: index, value: value });
-		}
-		pythonBarchartData = { table: pythonRows };
+		const twoHiddenLayersPrediction = tf
+			.squeeze($twoHiddenLayersModelStore.predict(processedImage))
+			.dataSync();
+		twoHiddenLayersBarchartData = predictionToBarchartData(twoHiddenLayersPrediction);
+
+		const leNetProcessedImage = tf.tidy(() =>
+			tf
+				.pad(pixels, [
+					[2, 2],
+					[2, 2],
+					[0, 0]
+				])
+				.expandDims(0)
+				.div(255)
+				.mul(-1)
+				.add(1)
+		);
+
+		const leNetPrediction = tf.squeeze($leNetModelStore.predict(leNetProcessedImage)).dataSync();
+		leNetBarchartData = predictionToBarchartData(leNetPrediction);
 	}
 
 	const visualizationSpec: VegaLiteSpec = {
 		$schema: 'https://vega.github.io/schema/vega-lite/v4.json',
-		width: 350,
-		height: 170,
+		width: 250,
+		height: 100,
 		data: {
 			name: 'table'
 		},
@@ -62,8 +82,13 @@
 		}
 	};
 
-	const pythonVisualizationSpec: VegaLiteSpec = JSON.parse(JSON.stringify(visualizationSpec));
-	pythonVisualizationSpec.encoding.color = { value: 'green' };
+	const twoHiddenLayersVisualisationSpec: VegaLiteSpec = JSON.parse(
+		JSON.stringify(visualizationSpec)
+	);
+	twoHiddenLayersVisualisationSpec.encoding.color = { value: 'green' };
+
+	const leNetVisualisationSpec: VegaLiteSpec = JSON.parse(JSON.stringify(visualizationSpec));
+	leNetVisualisationSpec.encoding.color = { value: 'orange' };
 </script>
 
 <Drawbox on:imageData={handleDrawnImage} />
@@ -74,4 +99,12 @@
 
 <Space h="lg" />
 
-<VegaLite data={pythonBarchartData} spec={pythonVisualizationSpec} options={{ actions: false }} />
+<VegaLite
+	data={twoHiddenLayersBarchartData}
+	spec={twoHiddenLayersVisualisationSpec}
+	options={{ actions: false }}
+/>
+
+<Space h="lg" />
+
+<VegaLite data={leNetBarchartData} spec={leNetVisualisationSpec} options={{ actions: false }} />

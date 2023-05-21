@@ -2,6 +2,4 @@ tensorflow; sys_platform == 'linux'
 tensorflow-macos; sys_platform == 'darwin'
 tensorflowjs
 numpy
-pillow
 
-bottle

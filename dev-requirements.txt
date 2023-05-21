@@ -1,7 +1,0 @@
--r requirements.txt
-
-black
-isort
-mypy
-bpython
-watchdog # For faster reloading of the streamlit app
