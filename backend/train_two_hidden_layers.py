@@ -1,32 +1,37 @@
 #!/usr/bin/env python
-import numpy as np
+
+import tensorflow as tf
 from tensorflow import keras
+from keras import datasets, models, layers, losses
 
 # For repeatable results
 keras.utils.set_random_seed(1)
 
-(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+(x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
 
 # Unroll the pixel grids and normalize values between 0 and 1
 IMAGE_SIZE = 28
-x_train = np.reshape(x_train, (60000, IMAGE_SIZE * IMAGE_SIZE)) / 255
-x_test = np.reshape(x_test, (10000, IMAGE_SIZE * IMAGE_SIZE)) / 255
+x_train = tf.reshape(x_train, (60000, IMAGE_SIZE * IMAGE_SIZE)) / 255
+x_test = tf.reshape(x_test, (10000, IMAGE_SIZE * IMAGE_SIZE)) / 255
 
 x_val = x_train[-2000:, :]
 y_val = y_train[-2000:]
 x_train = x_train[:-2000, :]
 y_train = y_train[:-2000]
 
-model = keras.models.Sequential()
-model.add(keras.layers.Dense(32, activation="relu", input_shape=x_train.shape[1:]))
-model.add(keras.layers.Dense(32, activation="relu"))
-model.add(keras.layers.Dense(10, activation="softmax"))
+model = models.Sequential(
+    [
+        layers.Dense(32, activation="relu", input_shape=x_train.shape[1:]),
+        layers.Dense(32, activation="relu"),
+        layers.Dense(10, activation="softmax"),
+    ]
+)
 
 model.summary()
 
 model.compile(
     optimizer="adam",
-    loss=keras.losses.sparse_categorical_crossentropy,
+    loss=losses.sparse_categorical_crossentropy,
     metrics=["accuracy"],
 )
 

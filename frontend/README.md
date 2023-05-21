@@ -4,11 +4,21 @@
 
 ## Developing
 
-npm run dev -- --open
+Running the app under development, with automatic reload :
+
+    npm run dev -- --open
+
+Automatically formatting :
+
+    npm run format
+
+Typechecking :
+
+    npm run check
 
 ## Deploying
 
-### Verify building for prod
+### Verifying the production build
 
 When building for prod, svelte tries to render server-side as much as possible to make
 pages appear as fast as possible.

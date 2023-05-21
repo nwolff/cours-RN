@@ -8,7 +8,7 @@
 	import { mnistDataStore, modelStore } from '../../stores';
 	import { getModel } from '$lib/model';
 
-	import { Button, Loader, Title, Space, Text, Stack } from '@svelteuidev/core';
+	import { Button, Loader, Title, Space, Text } from '@svelteuidev/core';
 
 	let data: MnistData;
 	let isLoading = true;
@@ -109,17 +109,12 @@
 
 		labels.dispose();
 	}
-
-	async function showConfusionMatrix() {
-		const [preds, labels] = doPrediction($modelStore);
-		labels.dispose();
-	}
 </script>
 
 {#if isLoading}
 	<Loader size="xl" />
 {:else}
-	<Title order="2">Entraîner notre modèle</Title>
+	<Title order={2}>Entraîner notre modèle</Title>
 	<p>
 		<Text>Notre but est d'entraîner un modèle à reconnaitre des chiffres.</Text>
 	</p>
@@ -131,11 +126,11 @@
 	</p>
 	<Space />
 
-	<Title order="2">Evaluation de notre modèle</Title>
+	<Title order={2}>Evaluation de notre modèle</Title>
 	<p>
 		<Text
-			>Maintenant que notre modèle est entraîné on peut évaluer la précision de ses prédictions.</Text
-		>
+			>Maintenant que notre modèle est entraîné on peut évaluer la précision de ses prédictions.
+		</Text>
 	</p>
 	<p><Button id="show-accuracy" on:click={showAccuracy}>Evaluer la précision</Button></p>
 {/if}
