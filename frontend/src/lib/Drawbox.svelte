@@ -65,6 +65,7 @@
 		canvas.clear();
 		canvas.backgroundColor = '#ffffff';
 		canvas.renderAll();
+		predict();
 	}
 
 	function computeBoundingRect(canvas: fabric.Canvas) {

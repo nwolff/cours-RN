@@ -7,8 +7,15 @@
 
 	const activations = 1;
 
-	function linkFilter(link: Link) {
-		return link.a.activation > 0.15 || Math.abs(link.weight) > 0.5;
+	function linkFilter(links: Link[]) {
+		const length = links.length;
+		if (length <= 1000) {
+			return links;
+		}
+		const sortedLinks = links.toSorted(
+			(a: Link, b: Link) => Math.abs(b.weight) - Math.abs(a.weight)
+		);
+		return sortedLinks.slice(0, Math.min(1000, 0.2 * length));
 	}
 </script>
 

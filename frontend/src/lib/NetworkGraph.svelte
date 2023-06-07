@@ -3,7 +3,6 @@
 	import { DefaultMap, hsv2rgb } from './pythonish';
 	import { DenseNetwork, LayerSpec, allLinks } from '$lib/network-layout';
 	import type { Link, LinkFilter } from '$lib/network-layout';
-
 	import type { LayerVariable } from '@tensorflow/tfjs';
 	import plotly from 'plotly.js-dist';
 
@@ -15,33 +14,30 @@
 
 	$: drawGraph(activations, weights, linkFilter);
 
-	const graphLayout = {
-		xaxis: {
-			visible: false
-		},
-		yaxis: {
-			visible: false
-		},
-		showlegend: false,
-		height: 700,
-		hovermode: false,
-		font: { size: 16, color: 'white' }
-	};
-
 	const network = getNetwork();
 
 	function getNetwork() {
 		return new DenseNetwork([
-			new LayerSpec("Couche d'entrée", 28 * 28, 5, 14 * 7),
-			new LayerSpec('Couche cachée 1', 32, 16),
-			new LayerSpec('Couche cachée 2', 32, 16),
-			new LayerSpec('Couche de sortie', 10, 50)
+			new LayerSpec("Couche d'entrée", 28 * 28, 8, 14 * 7),
+			new LayerSpec('Couche cachée 1', 32, 18),
+			new LayerSpec('Couche cachée 2', 32, 18),
+			new LayerSpec('Couche de sortie', 10, 18, 16)
 		]);
 	}
 
 	onMount(() => {
 		drawGraph(activations, weights, linkFilter);
 	});
+
+	function color_for_activation(activation: number): string {
+		if (!activation) {
+			// A small optimization
+			return '#FFFFFF';
+		}
+		const saturation = Math.min(1, activation);
+		const [r, g, b] = hsv2rgb(0.66, saturation, 1);
+		return `rgb(${r},${g},${b})`;
+	}
 
 	function neuronTraces(network: DenseNetwork) {
 		const traces = [];
@@ -52,15 +48,15 @@
 				y: neurons.map((n) => n.y),
 				text: neurons.map((n) => n.activation),
 				name: layer.name,
-				mode: 'markers+text',
+				mode: 'markers',
 				marker: {
-					color: neurons.map((n) => n.activation),
+					color: neurons.map((n) => color_for_activation(n.activation)),
 					symbol: 'circle',
-					colorscale: 'greys',
-					line: { width: 1 },
+					line: { width: 0.7 },
 					size: layer.marker_size
 				},
-				hoverinfo: 'skip'
+				// Ref: https://plotly.com/python/hover-text-and-formatting/
+				hovertemplate: '%{text:.0%}' + '<extra></extra>'
 			};
 			traces.push(trace);
 		}
@@ -69,28 +65,7 @@
 
 	function color_for_weight(weight: number): string {
 		// Divergent color ramps away from zero.
-		//  Using the hsv color model helps us build ramps.
-		var hue: number;
-		var saturation: number;
-		var value: number;
-		if (weight < 0) {
-			if (weight < -1) {
-				console.log('funny weight', weight);
-				weight = -1;
-			}
-			hue = 0.0;
-			saturation = -weight;
-			value = 1;
-		} else {
-			if (weight > 1) {
-				console.log('funny weight', weight);
-				weight = 1;
-			}
-			hue = 0.3;
-			saturation = weight;
-			value = 1;
-		}
-		const [r, g, b] = hsv2rgb(hue, saturation, value);
+		const [r, g, b] = hsv2rgb(weight > 0 ? 0.66 : 0, Math.abs(weight), 0.9);
 		return `rgb(${r},${g},${b})`;
 	}
 
@@ -140,19 +115,48 @@
 		return traces;
 	}
 
-	function drawGraph(activations, weights: LayerVariable[] | undefined, linkFilter: LinkFilter) {
+	const graphLayout = {
+		xaxis: {
+			visible: false
+		},
+		yaxis: {
+			visible: false
+		},
+		showlegend: false,
+		height: 700,
+		font: { size: 16, color: 'white' },
+		margin: { t: 0, l: 0, r: 0, b: 0 }
+	};
+
+	const graphConfig = {
+		displayModeBar: false,
+		scrollZoom: true
+		// responsive: true,
+	};
+
+	function drawGraph(
+		activations: number[][],
+		weights: LayerVariable[] | undefined,
+		linkFilter: LinkFilter
+	) {
 		if (!plotElement) {
 			console.log('no plotElement');
 			return;
 		}
-		const traces = [neuronTraces(network)];
+
+		if (activations) {
+			network.setActivations(activations);
+		}
+
+		const traces = [];
 		if (weights) {
 			const kernelWeights = weights.filter((l) => l.originalName.endsWith('kernel'));
 			const links = network.links(kernelWeights, linkFilter);
 			traces.push(linkTraces(links));
 		}
-		plotly.newPlot('plot-element', traces.flat(), graphLayout);
+		traces.push(neuronTraces(network));
+		plotly.newPlot('network-graph', traces.flat(), graphLayout, graphConfig);
 	}
 </script>
 
-<div bind:this={plotElement} id="plot-element" />
+<div bind:this={plotElement} id="network-graph" class="network-graph" />

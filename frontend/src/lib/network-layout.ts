@@ -57,6 +57,8 @@ export class LayerSpec {
 	}
 }
 
+const spaceBetweenRows = 0.02;
+
 export class Layer {
 	name: string;
 	marker_size: number;
@@ -69,16 +71,19 @@ export class Layer {
 		const neurons_per_row = spec.neurons_per_row || spec.neuron_count;
 
 		const rows_in_layer = Math.floor(neuron_count / neurons_per_row);
-		let y = 1 - rank / total_layer_count + rows_in_layer * 0.02;
+		let y = 1 - rank / total_layer_count + rows_in_layer * spaceBetweenRows;
 
 		const neuron_positions = [];
 		let index_in_row = 0;
+		if (neuron_count < neurons_per_row) {
+			index_in_row = (neurons_per_row - neuron_count) / 2;
+		}
 		for (let i = 0; i < neuron_count; i++) {
 			neuron_positions.push(new Point(index_in_row / (neurons_per_row - 1), y));
 			index_in_row++;
 			if (index_in_row == neurons_per_row) {
 				index_in_row = 0;
-				y -= 0.02;
+				y -= spaceBetweenRows;
 			}
 		}
 
@@ -86,10 +91,10 @@ export class Layer {
 	}
 }
 
-export type LinkFilter = (link: Link) => boolean;
+export type LinkFilter = (links: Link[]) => Link[];
 
-export function allLinks(_: Link) {
-	return true;
+export function allLinks(links: Link[]) {
+	return links;
 }
 
 export class DenseNetwork {
@@ -99,6 +104,14 @@ export class DenseNetwork {
 		this.layers = [];
 		for (const [rank, spec] of layer_specs.entries()) {
 			this.layers.push(new Layer(rank, layer_specs.length, spec));
+		}
+	}
+
+	setActivations(activations: number[][]) {
+		for (const [layer, activationsForLayer] of zip(this.layers, activations)) {
+			for (const [neuron, activation] of zip(layer.neurons, activationsForLayer)) {
+				neuron.activation = activation;
+			}
 		}
 	}
 
@@ -113,9 +126,11 @@ export class DenseNetwork {
 			weights
 		)) {
 			const weights_between_layers = weights_between_layers_tensor.val.arraySync();
-			// console.log("from layer", from_layer);
-			// console.log("to layer", to_layer);
+			// console.log('from layer', from_layer);
+			// console.log('to layer', to_layer);
 			// console.log("weights between layers", weights_between_layers);
+
+			const layerLinks = [];
 
 			for (const [from_neuron, outgoing_weights_for_neuron] of zip(
 				from_layer.neurons,
@@ -127,11 +142,13 @@ export class DenseNetwork {
 				for (const [to_neuron, weight] of zip(to_layer.neurons, outgoing_weights_for_neuron)) {
 					// console.log('from', from_neuron, 'to', to_neuron, 'weight', weight);
 					const link = new Link(from_neuron, to_neuron, weight);
-					if (linkFilter(link)) {
-						links.push(link);
-					}
+					layerLinks.push(link);
 				}
 			}
+
+			// console.log('Layer links ', layerLinks.length);
+			const filteredLayerLinks = linkFilter(layerLinks);
+			links.push(...filteredLayerLinks);
 		}
 
 		return links;

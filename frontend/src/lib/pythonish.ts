@@ -23,7 +23,7 @@ export class DefaultMap<K, V> extends Map<K, V> {
 	};
 }
 
-// https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately/54024653#54024653
+// https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately/
 export function hsv2rgb(h: number, s: number, v: number) {
 	const i = Math.floor(h * 6);
 	const f = h * 6 - i;
