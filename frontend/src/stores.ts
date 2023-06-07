@@ -16,8 +16,3 @@ export const twoHiddenLayersModelStore = asyncReadable(null, async () => {
 	const modelUrl = base + '/two_hidden_layers/model.json';
 	return await tf.loadLayersModel(modelUrl);
 });
-
-export const leNetModelStore = asyncReadable(null, async () => {
-	const modelUrl = base + '/le_net/model.json';
-	return await tf.loadLayersModel(modelUrl);
-});

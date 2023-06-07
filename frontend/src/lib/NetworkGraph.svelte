@@ -94,6 +94,10 @@
 		return `rgb(${r},${g},${b})`;
 	}
 
+	function width_for_weight(weight: number): number {
+		return Math.abs(weight);
+	}
+
 	function linkTraces(links: Link[]) {
 		// To draw each line exactly how we want it we need to return one scatter-plot per line, and displaying that is super slow.
 		// Instead we group the lines into buckets and draw all the lines in the same bucket with the same color and width and
@@ -125,7 +129,10 @@
 				y: edge_y_buckets.get(bucket),
 				mode: 'lines',
 				hoverinfo: 'skio',
-				line: { width: 0.4, color: color_for_weight(bucket / stride) }
+				line: {
+					width: width_for_weight(bucket / stride),
+					color: color_for_weight(bucket / stride)
+				}
 			};
 			traces.push(trace);
 		}

@@ -2,13 +2,12 @@
 	import Drawbox from '$lib/Drawbox.svelte';
 	import DistributionChart from '$lib/DistributionChart.svelte';
 	import NetworkGraph from '$lib/NetworkGraph.svelte';
-	import { Space, Divider, Grid } from '@svelteuidev/core';
+	import { Space, Grid } from '@svelteuidev/core';
 	import * as tf from '@tensorflow/tfjs';
-	import { modelStore, twoHiddenLayersModelStore, leNetModelStore } from '../../stores';
+	import { modelStore, twoHiddenLayersModelStore } from '../../stores';
 
 	let prediction: number[];
 	let twoHiddenLayersPrediction: number[];
-	let leNetPrediction: number[];
 
 	$: weights = $twoHiddenLayersModelStore?.weights; // XXX: this should be our store.
 
@@ -41,41 +40,20 @@
 		twoHiddenLayersPrediction = tf
 			.squeeze($twoHiddenLayersModelStore.predict(processedImage))
 			.dataSync();
-
-		const leNetProcessedImage = tf.tidy(() =>
-			tf
-				.pad(pixels, [
-					[2, 2],
-					[2, 2],
-					[0, 0]
-				])
-				.expandDims(0)
-				.div(255)
-				.mul(-1)
-				.add(1)
-		);
-
-		leNetPrediction = tf.squeeze($leNetModelStore.predict(leNetProcessedImage)).dataSync();
 	}
 </script>
 
-<Drawbox on:imageData={handleDrawnImage} />
-
-<Divider />
-
 <Grid cols={4}>
 	<Grid.Col span={1}>
+		<Drawbox on:imageData={handleDrawnImage} />
+
 		<Space h="lg" />
 
 		<DistributionChart distribution={prediction} />
 
 		<Space h="lg" />
 
-		<DistributionChart distribution={twoHiddenLayersPrediction} color="green" />
-
-		<Space h="lg" />
-
-		<DistributionChart distribution={leNetPrediction} color="orange" />
+		<DistributionChart distribution={twoHiddenLayersPrediction} color="orange" />
 	</Grid.Col>
 
 	<Grid.Col span={3}>
