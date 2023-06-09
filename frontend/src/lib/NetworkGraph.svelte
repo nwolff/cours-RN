@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { DefaultMap, hsv2rgb } from './pythonish';
-	import { DenseNetwork, LayerSpec, allLinks } from '$lib/network-layout';
-	import type { Link, LinkFilter } from '$lib/network-layout';
+	import { DefaultMap } from './pythonish';
+	import { hsv2rgb } from './colorConversion';
+	import { DenseNetwork, LayerSpec, allLinks } from './networkLayout';
+	import type { Link, LinkFilter } from './networkLayout';
 	import type { LayerVariable } from '@tensorflow/tfjs';
 	import plotly from 'plotly.js-dist';
 
 	let plotElement: any;
 
-	export let activations: any;
-	export let weights: LayerVariable[] | undefined;
+	export let activations: any = null;
+	export let weights: LayerVariable[];
 	export let linkFilter: LinkFilter = allLinks;
 
 	$: drawGraph(activations, weights, linkFilter);
@@ -19,8 +20,8 @@
 	function getNetwork() {
 		return new DenseNetwork([
 			new LayerSpec("Couche d'entrée", 28 * 28, 8, 14 * 7),
-			new LayerSpec('Couche cachée 1', 32, 18),
-			new LayerSpec('Couche cachée 2', 32, 18),
+			new LayerSpec('Couche cachée 1', 32, 18, 40),
+			new LayerSpec('Couche cachée 2', 32, 18, 40),
 			new LayerSpec('Couche de sortie', 10, 18, 16)
 		]);
 	}
@@ -64,29 +65,30 @@
 	}
 
 	function color_for_weight(weight: number): string {
-		// Divergent color ramps away from zero.
+		// Red and blue ramps depending on the sign
 		const [r, g, b] = hsv2rgb(weight > 0 ? 0.66 : 0, Math.abs(weight), 0.9);
 		return `rgb(${r},${g},${b})`;
 	}
 
 	function width_for_weight(weight: number): number {
-		return Math.abs(weight);
+		return Math.abs(weight * 1.3);
 	}
 
 	function linkTraces(links: Link[]) {
-		// To draw each line exactly how we want it we need to return one scatter-plot per line, and displaying that is super slow.
-		// Instead we group the lines into buckets and draw all the lines in the same bucket with the same color and width and
-		// make that a single scatter-plot.
-		// By varying the number of buckets one can balance precision of display with speed of rendering.
+		// To draw each line exactly how we want it we need to return one scatter-plot per line,
+		// and displaying that is super slow.
+		// Instead we group the lines into buckets and draw all the lines in the same bucket
+		// with the same color and width and make that a single scatter-plot.
+		// By varying the number of buckets one can balance precision of display with rendering speed.
 
-		const stride = 20; // the number of buckets is the range of weights times the stride
+		const bucket_size = 20; // the number of buckets is the range of weights times the bucket_size
 
-		// Each bucket contains a list of coordinates with holes.
+		// Each bucket contains a list of coordinates with gaps (nulls).
 		// See the gaps section of:  https://plotly.com/python/line-charts/
-		const edge_x_buckets = new DefaultMap(() => []);
-		const edge_y_buckets = new DefaultMap(() => []);
+		const edge_x_buckets = new DefaultMap<number, any>(() => []);
+		const edge_y_buckets = new DefaultMap<number, any>(() => []);
 		for (const link of links) {
-			const bucket = Math.round(link.weight * stride);
+			const bucket = Math.round(link.weight * bucket_size);
 			const edge_x = edge_x_buckets.get(bucket);
 			const edge_y = edge_y_buckets.get(bucket);
 			edge_x.push(link.a.x);
@@ -105,8 +107,8 @@
 				mode: 'lines',
 				hoverinfo: 'skio',
 				line: {
-					width: width_for_weight(bucket / stride),
-					color: color_for_weight(bucket / stride)
+					width: width_for_weight(bucket / bucket_size),
+					color: color_for_weight(bucket / bucket_size)
 				}
 			};
 			traces.push(trace);
@@ -130,8 +132,8 @@
 
 	const graphConfig = {
 		displayModeBar: false,
-		scrollZoom: true
-		// responsive: true,
+		scrollZoom: true,
+		responsive: true
 	};
 
 	function drawGraph(
@@ -149,12 +151,12 @@
 		}
 
 		const traces = [];
+		traces.push(neuronTraces(network));
 		if (weights) {
 			const kernelWeights = weights.filter((l) => l.originalName.endsWith('kernel'));
 			const links = network.links(kernelWeights, linkFilter);
 			traces.push(linkTraces(links));
 		}
-		traces.push(neuronTraces(network));
 		plotly.newPlot('network-graph', traces.flat(), graphLayout, graphConfig);
 	}
 </script>

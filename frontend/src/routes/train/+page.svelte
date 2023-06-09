@@ -1,19 +1,25 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-
 	import * as tf from '@tensorflow/tfjs';
-
 	import type { MnistData } from '$lib/data.js';
-
+	import NetworkGraph from '$lib/NetworkGraph.svelte';
 	import { mnistDataStore, modelStore } from '../../stores';
 	import { getModel } from '$lib/model';
-
-	import { Button, Loader, Title, Space, Text } from '@svelteuidev/core';
+	import type { Link } from '$lib/networkLayout';
+	import { Button, Loader, Space, Grid, Text, Title, Stack, Divider } from '@svelteuidev/core';
+	import RangeSlider from 'svelte-range-slider-pips';
 
 	let data: MnistData;
 	let isLoading = true;
+	let learningRates = [0];
+
+	$: learningRate = learningRates[0];
 
 	let tfvis;
+
+	let fitCallbacksContainer: HTMLElement;
+
+	$: weights = $modelStore?.weights;
 
 	onMount(async () => {
 		tfvis = await import('@tensorflow/tfjs-vis');
@@ -24,11 +30,17 @@
 		});
 	});
 
-	async function train(model: tf.Sequential, data: MnistData, fitCallbacks) {
-		const EPOCHS = 8;
-		const BATCH_SIZE = 100;
-		const trainDataSize = 5000;
-		const testDataSize = 1000;
+	async function train({
+		trainDataSize = 5000,
+		batchSize = 100,
+		epochs = 1,
+		learningRate = 0.01
+	} = {}) {
+		const model = $modelStore;
+
+		model.optimizer = new tf.SGDOptimizer(learningRate);
+
+		const testDataSize = trainDataSize / 5;
 
 		const [trainXs, trainYs] = tf.tidy(() => {
 			const d = data.nextTrainBatch(trainDataSize);
@@ -40,97 +52,85 @@
 			return [d.xs.reshape([testDataSize, 28 * 28]), d.labels];
 		});
 
-		return model.fit(trainXs, trainYs, {
-			batchSize: BATCH_SIZE,
-			validationData: [testXs, testYs],
-			epochs: EPOCHS,
-			shuffle: true,
-			callbacks: fitCallbacks
-		});
-	}
-
-	async function watchTraining() {
-		modelStore.update(() => getModel());
 		const metrics = ['acc', 'val_acc'];
-		const container = {
-			name: 'Evolution de la précision',
-			tab: 'Entraînement',
-			styles: { height: '800px' }
-		};
-		const callbacks = tfvis.show.fitCallbacks(container, metrics);
-		return train($modelStore, data, callbacks);
-	}
+		const visualFitCallbacks = tfvis.show.fitCallbacks(fitCallbacksContainer, metrics);
 
-	const classNames = [
-		'Zero',
-		'Un',
-		'Deux',
-		'Trois',
-		'Quatre',
-		'Cinq',
-		'Six',
-		'Sept',
-		'Huit',
-		'Neuf'
-	];
-
-	async function showModelSummary() {
-		const summaryContainer = { name: 'Résumé du modèle', tab: 'Inspection' };
-		tfvis.show.modelSummary(summaryContainer, $modelStore);
-		for (const [index, layer] of $modelStore.layers.entries()) {
-			const layerContainer = { name: 'Couche ' + index, tab: 'Inspection' };
-			tfvis.show.layer(layerContainer, layer);
+		function onBatchEnd(batch: number, logs: any): Promise<void> {
+			notifyModelChange();
+			return visualFitCallbacks.onBatchEnd(batch, logs);
 		}
-	}
 
-	function doPrediction(model: tf.Sequential, testDataSize = 1000) {
-		const testData = data.nextTestBatch(testDataSize);
-		const testxs = testData.xs.reshape([testDataSize, 28 * 28]);
-		const labels = testData.labels.argMax([-1]);
-		const preds = model.predict(testxs).argMax([-1]);
-
-		testxs.dispose();
-		return [preds, labels];
-	}
-
-	async function showAccuracy() {
-		const [preds, labels] = doPrediction($modelStore);
-
-		const perClassAccuracy = await tfvis.metrics.perClassAccuracy(labels, preds);
-		const perClassAccuracyContainer = { name: 'Précision par classe', tab: 'Evaluation' };
-		tfvis.show.perClassAccuracy(perClassAccuracyContainer, perClassAccuracy, classNames);
-
-		const confusionMatrix = await tfvis.metrics.confusionMatrix(labels, preds);
-		const confusionMatrixContainer = { name: 'Matrice de confusion', tab: 'Evaluation' };
-		tfvis.render.confusionMatrix(confusionMatrixContainer, {
-			values: confusionMatrix,
-			tickLabels: classNames
+		return model.fit(trainXs, trainYs, {
+			validationData: [testXs, testYs],
+			epochs: epochs,
+			batchSize: batchSize,
+			shuffle: true,
+			callbacks: { onBatchEnd }
 		});
+	}
 
-		labels.dispose();
+	async function train100() {
+		train({ trainDataSize: 100, batchSize: 25, epochs: 1, learningRate: learningRate });
+	}
+
+	async function train1000() {
+		train({ trainDataSize: 1000, batchSize: 50, epochs: 1, learningRate: learningRate });
+	}
+
+	async function trainFully() {
+		train({ trainDataSize: 5000, batchSize: 100, epochs: 8, learningRate: learningRate });
+	}
+
+	function notifyModelChange() {
+		modelStore.update((m) => m);
+	}
+
+	function resetModel() {
+		modelStore.update(() => getModel());
+	}
+
+	function linkFilter(links: Link[]) {
+		const length = links.length;
+		if (length <= 500) {
+			return links;
+		}
+		const sortedLinks = [...links].sort(
+			(l1: Link, l2: Link) => Math.abs(l2.weight) - Math.abs(l1.weight)
+		);
+		return sortedLinks.slice(0, Math.min(500, 0.1 * length));
 	}
 </script>
+
+<Title order={1}>Entraîner le réseau avec des images</Title>
+
+<Divider />
 
 {#if isLoading}
 	<Loader size="xl" />
 {:else}
-	<Title order={2}>Entraîner notre modèle</Title>
-	<p>
-		<Text>Notre but est d'entraîner un modèle à reconnaitre des chiffres.</Text>
-	</p>
-	<p>
-		<Button on:click={watchTraining}>Entraîner</Button>
-	</p>
-	<p>
-		<Button on:click={showModelSummary}>Voir le résumé du modèle</Button>
-	</p>
-	<Space />
-
-	<Title order={2}>Evaluation de notre modèle</Title>
-	<p>
-		<Text
-			>Maintenant que notre modèle est entraîné on peut évaluer la précision de ses prédictions.
-		</Text>
-	</p>
-	<p><Button id="show-accuracy" on:click={showAccuracy}>Evaluer la précision</Button></p>
+	<Grid cols={4}>
+		<Grid.Col span={1}>
+			<Space h="xl" />
+			<Stack>
+				<Text>Taux d'apprentissage</Text>
+				<RangeSlider
+					bind:values={learningRates}
+					min={0}
+					max={1}
+					step={0.2}
+					pips
+					all="label"
+					float
+				/>
+				<Button on:click={train100}>Entraîner avec 100 images</Button>
+				<Button on:click={train1000}>Entraîner avec 1000 images</Button>
+				<Button on:click={trainFully}>Entraîner avec 5000 images, 8 fois</Button>
+				<Button color="Red" on:click={resetModel}>Réinitialiser le réseau</Button>
+			</Stack>
+			<div bind:this={fitCallbacksContainer} />
+		</Grid.Col>
+		<Grid.Col span={3}>
+			<NetworkGraph {weights} {linkFilter} />
+		</Grid.Col>
+	</Grid>
 {/if}

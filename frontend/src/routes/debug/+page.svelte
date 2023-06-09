@@ -1,22 +1,20 @@
 <script lang="ts">
-	import NetworkGraph from '$lib/NetworkGraph.svelte';
-	import { twoHiddenLayersModelStore } from '../../stores';
-	import type { Link } from '$lib/network-layout';
+	import { onMount } from 'svelte';
+	import { modelStore } from '../../stores';
 
-	$: weights = $twoHiddenLayersModelStore?.weights;
+	let tfvis;
 
-	const activations = 1;
+	onMount(async () => {
+		tfvis = await import('@tensorflow/tfjs-vis');
+		showModelSummary();
+	});
 
-	function linkFilter(links: Link[]) {
-		const length = links.length;
-		if (length <= 1000) {
-			return links;
+	async function showModelSummary() {
+		const summaryContainer = { name: 'Résumé du modèle', tab: 'Inspection' };
+		tfvis.show.modelSummary(summaryContainer, $modelStore);
+		for (const [index, layer] of $modelStore.layers.entries()) {
+			const layerContainer = { name: 'Couche ' + index, tab: 'Inspection' };
+			tfvis.show.layer(layerContainer, layer);
 		}
-		const sortedLinks = links.toSorted(
-			(a: Link, b: Link) => Math.abs(b.weight) - Math.abs(a.weight)
-		);
-		return sortedLinks.slice(0, Math.min(1000, 0.2 * length));
 	}
 </script>
-
-<NetworkGraph {activations} {weights} {linkFilter} />

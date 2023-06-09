@@ -1,7 +1,8 @@
 <script type="ts">
-	import { Text } from '@svelteuidev/core';
+	import { Title, Divider, Image } from '@svelteuidev/core';
+	import numbersImage from '$lib/assets/neural-numbers.png';
 </script>
 
-<p>
-	<Text>Définir, entraîner, vérifier, prédire</Text>
-</p>
+<Title order={1}>Intelligence Artificielle - Réseaux de neurones</Title>
+<Divider />
+<Image src={numbersImage} />

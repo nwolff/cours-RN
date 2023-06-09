@@ -5,21 +5,14 @@
 </script>
 
 <AppShell>
-	<Navbar slot="navbar" width={{ base: '100%', sm: 100 }}>
+	<Navbar slot="navbar" width={{ base: '100%', sm: 110 }}>
 		<Stack>
-			<Space />
-			<Anchor href="{base}/">Accueil</Anchor>
+			<Anchor href="{base}/"><Logo size={40} /></Anchor>
+			<Anchor href="{base}/predict">Reconnaître</Anchor>
 			<Anchor href="{base}/train">Entraîner</Anchor>
-			<Anchor href="{base}/predict">Prédire</Anchor>
+			<Anchor href="{base}/evaluate">Evaluer</Anchor>
 		</Stack>
 	</Navbar>
-
-	<Header slot="header" height={50}>
-		<Group>
-			<Logo size={40} />
-			<Title order={1}>IA - Réseaux de neurones</Title>
-		</Group>
-	</Header>
 
 	<slot />
 </AppShell>

@@ -29,9 +29,9 @@ export class Neuron {
 export class Link {
 	a: Neuron;
 	b: Neuron;
-	weight: number | null;
+	weight: number;
 
-	constructor(a: Neuron, b: Neuron, weight: number | null) {
+	constructor(a: Neuron, b: Neuron, weight: number = 0) {
 		this.a = a;
 		this.b = b;
 		this.weight = weight;
@@ -57,8 +57,6 @@ export class LayerSpec {
 	}
 }
 
-const spaceBetweenRows = 0.02;
-
 export class Layer {
 	name: string;
 	marker_size: number;
@@ -69,9 +67,10 @@ export class Layer {
 		this.marker_size = spec.marker_size;
 		const neuron_count = spec.neuron_count;
 		const neurons_per_row = spec.neurons_per_row || spec.neuron_count;
+		const spaceBetweenNeurons = 1 / neurons_per_row;
 
 		const rows_in_layer = Math.floor(neuron_count / neurons_per_row);
-		let y = 1 - rank / total_layer_count + rows_in_layer * spaceBetweenRows;
+		let y = 1 - rank / total_layer_count + rows_in_layer * spaceBetweenNeurons;
 
 		const neuron_positions = [];
 		let index_in_row = 0;
@@ -83,7 +82,7 @@ export class Layer {
 			index_in_row++;
 			if (index_in_row == neurons_per_row) {
 				index_in_row = 0;
-				y -= spaceBetweenRows;
+				y -= spaceBetweenNeurons;
 			}
 		}
 
@@ -118,17 +117,12 @@ export class DenseNetwork {
 	links(weights: LayerVariable[], linkFilter: LinkFilter) {
 		const links: Link[] = [];
 
-		// console.log(zip(network.layers.slice(0, -1), network.layers.slice(1), weights));
-
 		for (const [from_layer, to_layer, weights_between_layers_tensor] of zip(
 			this.layers.slice(0, -1),
 			this.layers.slice(1),
 			weights
 		)) {
 			const weights_between_layers = weights_between_layers_tensor.val.arraySync();
-			// console.log('from layer', from_layer);
-			// console.log('to layer', to_layer);
-			// console.log("weights between layers", weights_between_layers);
 
 			const layerLinks = [];
 
@@ -136,17 +130,11 @@ export class DenseNetwork {
 				from_layer.neurons,
 				weights_between_layers
 			)) {
-				// console.log("from neuron", from_neuron);
-				// console.log("outgoing weights for neuron", outgoing_weights_for_neuron);
-
 				for (const [to_neuron, weight] of zip(to_layer.neurons, outgoing_weights_for_neuron)) {
-					// console.log('from', from_neuron, 'to', to_neuron, 'weight', weight);
 					const link = new Link(from_neuron, to_neuron, weight);
 					layerLinks.push(link);
 				}
 			}
-
-			// console.log('Layer links ', layerLinks.length);
 			const filteredLayerLinks = linkFilter(layerLinks);
 			links.push(...filteredLayerLinks);
 		}

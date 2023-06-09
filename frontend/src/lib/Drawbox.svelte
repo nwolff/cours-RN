@@ -3,6 +3,9 @@
 	import { onMount, createEventDispatcher } from 'svelte';
 	import { Button, Group } from '@svelteuidev/core';
 
+	export let brushWidth = 15;
+	export let movesPerPrediction = 20;
+
 	const dispatch = createEventDispatcher();
 
 	function processImage(canvas: fabric.Canvas): ImageData {
@@ -30,13 +33,12 @@
 	let canvas: fabric.Canvas;
 	let mouseMoveCount = 0;
 	let drawing = false;
-	const movesPerPrediction = 20;
 
 	onMount(() => {
 		// Canvas setup
 		canvas = new fabric.Canvas('canvas');
 		canvas.isDrawingMode = true;
-		canvas.freeDrawingBrush.width = 15;
+		canvas.freeDrawingBrush.width = brushWidth;
 		canvas.freeDrawingBrush.color = '#000000';
 		canvas.backgroundColor = '#ffffff';
 		canvas.renderAll();
@@ -94,8 +96,8 @@
 	}
 
 	function predict() {
-		console.log('predict');
-		console.log(computeBoundingRect(canvas));
+		// console.log('predict');
+		// console.log(computeBoundingRect(canvas));
 		const image = processImage(canvas);
 		dispatch('imageData', { image: image });
 	}

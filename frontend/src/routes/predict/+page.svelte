@@ -2,8 +2,8 @@
 	import Drawbox from '$lib/Drawbox.svelte';
 	import DistributionChart from '$lib/DistributionChart.svelte';
 	import NetworkGraph from '$lib/NetworkGraph.svelte';
-	import type { Link } from '$lib/network-layout';
-	import { Space, Grid, Text, Divider, Title } from '@svelteuidev/core';
+	import { Link } from '$lib/networkLayout';
+	import { Space, Grid, Divider, Title } from '@svelteuidev/core';
 	import * as tf from '@tensorflow/tfjs';
 	import { modelStore, twoHiddenLayersModelStore } from '../../stores';
 
@@ -14,10 +14,8 @@
 	$: weights = $modelStore?.weights;
 
 	function handleDrawnImage(event: { detail: { image: ImageData } }) {
-		console.log('got image');
 		const image = event.detail.image;
 		const pixels = tf.browser.fromPixels(image, 1);
-
 		doPrediction(pixels);
 	}
 
@@ -44,7 +42,6 @@
 		twoHiddenLayersPrediction = tf
 			.squeeze($twoHiddenLayersModelStore.predict(processedImage))
 			.dataSync();
-		// console.log('two hidden layers prediction', twoHiddenLayersPrediction);
 
 		const activationsTensor = toFeatureModel($modelStore).predict(processedImage);
 		activations = [processedImage, ...activationsTensor].map((x) => tf.squeeze(x).dataSync());
@@ -54,52 +51,48 @@
 		// console.log('prediction', prediction);
 	}
 
-	function linkFilterNoActivations(links: Link[]) {
+	function keepTopLinks(links: Link[]): Link[] {
 		const length = links.length;
 		if (length <= 500) {
 			return links;
 		}
-		const sortedLinks = links.toSorted(
+		const sortedLinks = [...links].sort(
 			(l1: Link, l2: Link) => Math.abs(l2.weight) - Math.abs(l1.weight)
 		);
 		return sortedLinks.slice(0, Math.min(500, 0.1 * length));
 	}
 
-	function linkFilterWhenActivations(links: Link[]) {
-		// Too much code repetition.
-		const candidates = links.filter((link) => Math.abs(link.a.activation * link.weight) > 0.02);
-		const length = candidates.length;
-		if (length <= 500) {
-			return candidates;
+	function applyActivation(links: Link[]): Link[] {
+		if (!links.find((link) => link.a.activation)) {
+			// A small optimization
+			return links;
 		}
-		const sortedCandidates = candidates.toSorted(
-			(l1: Link, l2: Link) =>
-				Math.abs(l2.a.activation * l2.weight) - Math.abs(l2.a.activation * l1.weight)
+		return links.map(
+			(link) => new Link(link.a, link.b, link.weight * (1 + 0.5 * link.a.activation))
 		);
-		return sortedCandidates.slice(0, Math.min(500, 0.1 * length));
 	}
 
 	function linkFilter(links: Link[]) {
-		if (links.find((link) => link.a.activation)) {
-			// console.log('using when activations filter');
-			return linkFilterWhenActivations(links);
-		} else {
-			// console.log('using no activations filter');
-			return linkFilterNoActivations(links);
-		}
+		const linksWithActivationApplied = applyActivation(links);
+		return keepTopLinks(linksWithActivationApplied);
 	}
 </script>
 
+<Title order={1}>Reconnaître des chiffres</Title>
+
+<Divider />
+
 <Grid cols={4}>
 	<Grid.Col span={1}>
-		<Drawbox on:imageData={handleDrawnImage} />
+		<Space h="xl" />
+		<Drawbox brushWidth={12} on:imageData={handleDrawnImage} />
 		<Space h="lg" />
 
 		<Divider />
 
 		<Title order={4}>Modèle qui apprend</Title>
 		<Space h="lg" />
-		<DistributionChart distribution={prediction} />
+		<DistributionChart distribution={prediction} color="#0000ff" />
 		<Space h="lg" />
 
 		<Divider />
