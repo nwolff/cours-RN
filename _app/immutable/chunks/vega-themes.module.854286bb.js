@@ -1,4 +1,4 @@
-import{g as Sg}from"./stores.68ed9daf.js";/*!
+import{e as Sg}from"./stores.b0a42fa7.js";/*!
  * https://github.com/Starcounter-Jack/JSON-Patch
  * (c) 2017-2022 Joachim Wester
  * MIT licensed
