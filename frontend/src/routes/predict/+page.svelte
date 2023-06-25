@@ -2,11 +2,13 @@
 	import Drawbox from '$lib/Drawbox.svelte';
 	import DistributionChart from '$lib/DistributionChart.svelte';
 	import NetworkGraph from '$lib/NetworkGraph.svelte';
-	import { Link } from '$lib/networkLayout';
+	import { Link } from '$lib/NetworkShape';
 	import { Space, Grid, Divider, Title } from '@svelteuidev/core';
 	import * as tf from '@tensorflow/tfjs';
-	import { modelStore, twoHiddenLayersModelStore } from '../../stores';
+	import { getNetworkShape, modelStore, twoHiddenLayersModelStore } from '../../stores';
 
+	const networkShape = getNetworkShape();
+	const labels = networkShape.outputLayer.labels;
 	let prediction: number[];
 	let twoHiddenLayersPrediction: number[];
 	let activations: number[][];
@@ -92,17 +94,17 @@
 
 		<Title order={4}>Modèle qui apprend</Title>
 		<Space h="lg" />
-		<DistributionChart distribution={prediction} color="#0000ff" />
+		<DistributionChart {labels} values={prediction} color="#0000ff" />
 		<Space h="lg" />
 
 		<Divider />
 
 		<Title order={4}>Modèle déja entraîné</Title>
 		<Space h="lg" />
-		<DistributionChart distribution={twoHiddenLayersPrediction} color="orange" />
+		<DistributionChart {labels} values={twoHiddenLayersPrediction} color="orange" />
 	</Grid.Col>
 
 	<Grid.Col span={3}>
-		<NetworkGraph {activations} {weights} {linkFilter} />
+		<NetworkGraph {networkShape} {activations} {weights} {linkFilter} />
 	</Grid.Col>
 </Grid>

@@ -1,33 +1,23 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { DefaultMap } from './pythonish';
-	import { hsv2rgb } from './colorConversion';
-	import { DenseNetwork, LayerSpec, allLinks } from './networkLayout';
-	import type { Link, LinkFilter } from './networkLayout';
+	import type { DenseNetwork, Link, LinkFilter } from './NetworkShape';
 	import type { LayerVariable } from '@tensorflow/tfjs';
+	import { onMount } from 'svelte';
+	import { DefaultMap, zip } from './pythonish';
+	import { hsv2rgb } from './colorConversion';
+	import { allLinks } from './NetworkShape';
 	import plotly from 'plotly.js-dist';
 
-	let plotElement: any;
+	let plotElement: HTMLElement;
 
-	export let activations: any = null;
+	export let networkShape: DenseNetwork;
+	export let activations: number[][];
 	export let weights: LayerVariable[];
 	export let linkFilter: LinkFilter = allLinks;
 
-	$: drawGraph(activations, weights, linkFilter);
-
-	const network = getNetwork();
-
-	function getNetwork() {
-		return new DenseNetwork([
-			new LayerSpec("Couche d'entrée", 28 * 28, 8, 14 * 7),
-			new LayerSpec('Couche cachée 1', 32, 18, 40),
-			new LayerSpec('Couche cachée 2', 32, 18, 40),
-			new LayerSpec('Couche de sortie', 10, 18, 16)
-		]);
-	}
+	$: drawGraph(networkShape, activations, weights, linkFilter);
 
 	onMount(() => {
-		drawGraph(activations, weights, linkFilter);
+		drawGraph(networkShape, activations, weights, linkFilter);
 	});
 
 	function color_for_activation(activation: number): string {
@@ -40,25 +30,31 @@
 		return `rgb(${r},${g},${b})`;
 	}
 
-	function neuronTraces(network: DenseNetwork) {
+	function neuronTraces(networkShape: DenseNetwork, activations: number[][] | null) {
 		const traces = [];
-		for (const layer of network.layers) {
-			const neurons = layer.neurons;
+		for (const [i, layer] of networkShape.layers.entries()) {
+			const layerActivations = activations?.[i];
 			const trace = {
-				x: neurons.map((n) => n.x),
-				y: neurons.map((n) => n.y),
-				text: neurons.map((n) => n.activation),
+				x: layer.neurons.map((n) => n.x),
+				y: layer.neurons.map((n) => n.y),
+				text: layerActivations,
 				name: layer.name,
 				mode: 'markers',
 				marker: {
-					color: neurons.map((n) => color_for_activation(n.activation)),
+					// Without array.from mapping doesn't work properly
+					color: layerActivations
+						? Array.from(layerActivations).map((a) => color_for_activation(a))
+						: 'white',
 					symbol: 'circle',
 					line: { width: 0.7 },
 					size: layer.marker_size
 				},
-				// Ref: https://plotly.com/python/hover-text-and-formatting/
-				hovertemplate: '%{text:.0%}' + '<extra></extra>'
+				hovertemplate: '<extra></extra>'
 			};
+			if (layerActivations) {
+				// https://plotly.com/python/hover-text-and-formatting/
+				trace.hovertemplate = '%{text:.0%}' + trace.hovertemplate;
+			}
 			traces.push(trace);
 		}
 		return traces;
@@ -117,7 +113,7 @@
 		return traces;
 	}
 
-	const graphLayout = {
+	const defaultGraphLayout = {
 		xaxis: {
 			visible: false
 		},
@@ -125,8 +121,8 @@
 			visible: false
 		},
 		showlegend: false,
-		height: 700,
-		font: { size: 16, color: 'white' },
+		height: 650,
+		font: { size: 18, color: 'black' },
 		margin: { t: 0, l: 0, r: 0, b: 0 }
 	};
 
@@ -136,7 +132,29 @@
 		responsive: true
 	};
 
+	function makeGraphLayout(networkShape: DenseNetwork) {
+		// Add annotations under the output layer neurons
+		// https://plotly.com/javascript/text-and-annotations/
+
+		const annotations = [];
+		const outputLayer = networkShape.outputLayer;
+		for (const [neuron, label] of zip(outputLayer.neurons, outputLayer.labels)) {
+			annotations.push({
+				x: neuron.x,
+				y: neuron.y,
+				yanchor: 'top',
+				yshift: -10,
+				text: label,
+				showarrow: false
+			});
+		}
+		const layout = JSON.parse(JSON.stringify(defaultGraphLayout));
+		layout.annotations = annotations;
+		return layout;
+	}
+
 	function drawGraph(
+		networkShape: DenseNetwork,
 		activations: number[][],
 		weights: LayerVariable[] | undefined,
 		linkFilter: LinkFilter
@@ -146,18 +164,21 @@
 			return;
 		}
 
-		if (activations) {
-			network.setActivations(activations);
+		const traces = [];
+
+		traces.push(...neuronTraces(networkShape, activations));
+
+		if (weights) {
+			// We don't want the bias weights when generating the links
+			const kernelWeights = weights.filter((l) => l.originalName.endsWith('kernel'));
+
+			const links = networkShape.getLinks(kernelWeights, activations, linkFilter);
+			traces.push(...linkTraces(links));
 		}
 
-		const traces = [];
-		traces.push(neuronTraces(network));
-		if (weights) {
-			const kernelWeights = weights.filter((l) => l.originalName.endsWith('kernel'));
-			const links = network.links(kernelWeights, linkFilter);
-			traces.push(linkTraces(links));
-		}
-		plotly.newPlot('network-graph', traces.flat(), graphLayout, graphConfig);
+		const graphLayout = makeGraphLayout(networkShape);
+
+		plotly.newPlot('network-graph', traces, graphLayout, graphConfig);
 	}
 </script>
 

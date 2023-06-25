@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { modelStore } from '../../stores';
+	import DistributionChart from '$lib/DistributionChart.svelte';
 
 	let tfvis;
+
+	const labels = ['z', '1', 't', '3', 'F', '5', 'six', '7', '8', '9'];
+	const values = [0, 0, 0.2, 0.3, 0.5, 0, 0, 0, 0];
 
 	onMount(async () => {
 		tfvis = await import('@tensorflow/tfjs-vis');
@@ -18,3 +22,5 @@
 		}
 	}
 </script>
+
+<DistributionChart {labels} {values} color="orange" />

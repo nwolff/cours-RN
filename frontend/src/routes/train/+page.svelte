@@ -1,14 +1,14 @@
 <script lang="ts">
+	import type { MnistData } from '$lib/data.js';
+	import type { Link } from '$lib/NetworkShape';
 	import { onMount } from 'svelte';
 	import * as tf from '@tensorflow/tfjs';
-	import type { MnistData } from '$lib/data.js';
 	import NetworkGraph from '$lib/NetworkGraph.svelte';
-	import { mnistDataStore, modelStore } from '../../stores';
-	import { getModel } from '$lib/model';
-	import type { Link } from '$lib/networkLayout';
+	import { mnistDataStore, modelStore, newModel, getNetworkShape } from '../../stores';
 	import { Button, Loader, Space, Grid, Text, Title, Stack, Divider } from '@svelteuidev/core';
 	import RangeSlider from 'svelte-range-slider-pips';
 
+	const networkShape = getNetworkShape();
 	let data: MnistData;
 	let isLoading = true;
 	let learningRates = [0];
@@ -86,7 +86,7 @@
 	}
 
 	function resetModel() {
-		modelStore.update(() => getModel());
+		modelStore.update(() => newModel());
 	}
 
 	function linkFilter(links: Link[]) {
@@ -130,7 +130,7 @@
 			<div bind:this={fitCallbacksContainer} />
 		</Grid.Col>
 		<Grid.Col span={3}>
-			<NetworkGraph {weights} {linkFilter} />
+			<NetworkGraph {networkShape} {weights} {linkFilter} />
 		</Grid.Col>
 	</Grid>
 {/if}
