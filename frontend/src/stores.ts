@@ -15,6 +15,8 @@ export const twoHiddenLayersModelStore = asyncReadable(null, async () => {
 	return await tf.loadLayersModel(modelUrl);
 });
 
+export const learningRateStore = writable(0);
+
 export function getNetworkShape() {
 	return new DenseNetwork(
 		{

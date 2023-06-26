@@ -1,10 +1,16 @@
 <script lang="ts">
 	import type { MnistData } from '$lib/data.js';
 	import type { Link } from '$lib/NetworkShape';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import * as tf from '@tensorflow/tfjs';
 	import NetworkGraph from '$lib/NetworkGraph.svelte';
-	import { mnistDataStore, modelStore, newModel, getNetworkShape } from '../../stores';
+	import {
+		learningRateStore,
+		mnistDataStore,
+		modelStore,
+		newModel,
+		getNetworkShape
+	} from '../../stores';
 	import { Button, Loader, Space, Grid, Text, Title, Stack, Divider } from '@svelteuidev/core';
 	import RangeSlider from 'svelte-range-slider-pips';
 
@@ -12,8 +18,6 @@
 	let data: MnistData;
 	let isLoading = true;
 	let learningRates = [0];
-
-	$: learningRate = learningRates[0];
 
 	let tfvis;
 
@@ -28,6 +32,15 @@
 			isLoading = false;
 			data = value;
 		});
+
+		learningRateStore.load().then((value) => {
+			console.log('loaded from store', value);
+			learningRates = [value];
+		});
+	});
+
+	onDestroy(async () => {
+		learningRateStore.set(learningRates[0]);
 	});
 
 	async function train({
@@ -70,15 +83,15 @@
 	}
 
 	async function train100() {
-		train({ trainDataSize: 100, batchSize: 25, epochs: 1, learningRate: learningRate });
+		train({ trainDataSize: 100, batchSize: 25, epochs: 1, learningRate: learningRates[0] });
 	}
 
 	async function train1000() {
-		train({ trainDataSize: 1000, batchSize: 50, epochs: 1, learningRate: learningRate });
+		train({ trainDataSize: 1000, batchSize: 50, epochs: 1, learningRate: learningRates[0] });
 	}
 
 	async function trainFully() {
-		train({ trainDataSize: 5000, batchSize: 100, epochs: 8, learningRate: learningRate });
+		train({ trainDataSize: 5000, batchSize: 100, epochs: 8, learningRate: learningRates[0] });
 	}
 
 	function notifyModelChange() {
@@ -120,7 +133,7 @@
 					step={0.2}
 					pips
 					all="label"
-					float
+					springValues={{ stiffness: 0.2, damping: 0.7 }}
 				/>
 				<Button on:click={train100}>Entraîner avec 100 images</Button>
 				<Button on:click={train1000}>Entraîner avec 1000 images</Button>
