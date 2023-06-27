@@ -1,7 +1,7 @@
 ## Setting up python and dependencies
 
     pyenv install 3.10.11
-    cd NNVisualizer
+    cd Cours-RN
 
     allow direnv
 

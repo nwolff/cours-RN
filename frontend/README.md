@@ -1,3 +1,5 @@
+# A SvelteKit application written in typescript
+
 ## Installing
 
     npm install
@@ -21,8 +23,8 @@ Typechecking :
 ### Verifying the production build
 
 When building for prod, svelte tries to render server-side as much as possible to make
-pages appear as fast as possible.
-A lot of our routes run only in the browser and we disable ssr for those.
+pages appear rapidly.  A lot of our routes can only run in the browser and we disable 
+server-side-rendering for those.
 
 This step makes sure we haven't forgotten anything.
 

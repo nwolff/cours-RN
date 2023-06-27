@@ -3,8 +3,6 @@
 	import { onMount, onDestroy, createEventDispatcher } from 'svelte';
 	import { Button, Group } from '@svelteuidev/core';
 
-	export let movesPerPrediction = 20;
-
 	const dispatch = createEventDispatcher();
 
 	let SCALE_FACTOR = 9;

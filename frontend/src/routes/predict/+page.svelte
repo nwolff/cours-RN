@@ -3,9 +3,10 @@
 	import DistributionChart from '$lib/DistributionChart.svelte';
 	import NetworkGraph from '$lib/NetworkGraph.svelte';
 	import { Link } from '$lib/NetworkShape';
-	import { Space, Grid, Divider, Title } from '@svelteuidev/core';
+	import { Space, Grid, Divider, Title, Loader } from '@svelteuidev/core';
 	import * as tf from '@tensorflow/tfjs';
 	import { getNetworkShape, modelStore, twoHiddenLayersModelStore } from '../../stores';
+	import { onMount } from 'svelte';
 
 	const networkShape = getNetworkShape();
 	const labels = networkShape.outputLayer.labels;
@@ -13,7 +14,15 @@
 	let twoHiddenLayersPrediction: number[];
 	let activations: number[][];
 
+	let isLoading = true;
+
 	$: weights = $modelStore?.weights;
+
+	onMount(async () => {
+		await twoHiddenLayersModelStore.load();
+		await modelStore.load();
+		isLoading = false;
+	});
 
 	function handleDrawnImage(event: { detail: { image: ImageData } }) {
 		const image = event.detail.image;
@@ -82,27 +91,31 @@
 
 <Divider />
 
-<Grid cols={4}>
-	<Grid.Col span={1}>
-		<Space h="xl" />
-		<DrawBox on:imageData={handleDrawnImage} />
-		<Space h="lg" />
+{#if isLoading}
+	<Loader size="xl" />
+{:else}
+	<Grid cols={4}>
+		<Grid.Col span={1}>
+			<Space h="lg" />
+			<DrawBox on:imageData={handleDrawnImage} />
+			<Space h="sm" />
 
-		<Divider />
+			<Divider />
 
-		<Title order={4}>Modèle qui apprend</Title>
-		<Space h="lg" />
-		<DistributionChart {labels} values={prediction} color="#0000ff" />
-		<Space h="lg" />
+			<Title order={4}>Modèle qui apprend</Title>
+			<Space h="sm" />
+			<DistributionChart {labels} values={prediction} color="#0000ff" />
+			<Space h="sm" />
 
-		<Divider />
+			<Divider />
 
-		<Title order={4}>Modèle déja entraîné</Title>
-		<Space h="lg" />
-		<DistributionChart {labels} values={twoHiddenLayersPrediction} color="orange" />
-	</Grid.Col>
+			<Title order={4}>Modèle déja entraîné</Title>
+			<Space h="sm" />
+			<DistributionChart {labels} values={twoHiddenLayersPrediction} color="orange" />
+		</Grid.Col>
 
-	<Grid.Col span={3}>
-		<NetworkGraph {networkShape} {activations} {weights} {linkFilter} />
-	</Grid.Col>
-</Grid>
+		<Grid.Col span={3}>
+			<NetworkGraph {networkShape} {activations} {weights} {linkFilter} />
+		</Grid.Col>
+	</Grid>
+{/if}

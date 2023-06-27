@@ -34,7 +34,6 @@
 		});
 
 		learningRateStore.load().then((value) => {
-			console.log('loaded from store', value);
 			learningRates = [value];
 		});
 	});
