@@ -27,6 +27,7 @@
 			x: {
 				field: 'label',
 				type: 'nominal',
+				sort: null,
 				title: null,
 				axis: { labelFontSize: 18, labelAngle: 0, ticks: false }
 			},

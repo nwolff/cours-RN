@@ -5,8 +5,8 @@
 
 	let tfvis;
 
-	const labels = ['z', '1', 't', '3', 'F', '5', 'six', '7', '8', '9'];
-	const values = [0, 0, 0.2, 0.3, 0.5, 0, 0, 0, 0];
+	const labels = ['z', '1', 't', 'F', '5', 'six'];
+	const values = [0, 0.1, 0.2, 0.3, 0.5, 0.6];
 
 	onMount(async () => {
 		tfvis = await import('@tensorflow/tfjs-vis');
