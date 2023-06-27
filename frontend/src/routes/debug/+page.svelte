@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { modelStore } from '../../stores';
 	import DistributionChart from '$lib/DistributionChart.svelte';
+	import DrawBox from '$lib/DrawBox.svelte';
 
 	let tfvis;
 
@@ -21,6 +22,11 @@
 			tfvis.show.layer(layerContainer, layer);
 		}
 	}
+
+	function handleDrawnImage(event: { detail: { image: CanvasRenderingContext2D } }) {
+		console.log('handleDrawnImage', event.detail.image);
+	}
 </script>
 
+<DrawBox on:imageData={handleDrawnImage} />
 <DistributionChart {labels} {values} color="orange" />

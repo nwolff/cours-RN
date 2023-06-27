@@ -39,7 +39,6 @@
 		"@svelteuidev/core": "^0.12.1",
 		"@tensorflow/tfjs": "^4.5.0",
 		"@tensorflow/tfjs-vis": "^1.5.1",
-		"fabric": "^5.3.0",
 		"plotly.js-dist": "^2.23.2",
 		"svelte-range-slider-pips": "^2.1.1",
 		"svelte-vega": "^2.0.0"

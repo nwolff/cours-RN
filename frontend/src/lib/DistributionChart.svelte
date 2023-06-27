@@ -5,7 +5,7 @@
 
 	export let labels: string[] = [];
 	export let values: number[] = [];
-	export let color: string = 'blue';
+	export let color = 'blue';
 
 	$: barchartData = toData(labels, values);
 

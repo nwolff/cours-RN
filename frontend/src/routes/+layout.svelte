@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import { Stack, Space, Group, Anchor, AppShell, Header, Title, Navbar } from '@svelteuidev/core';
+	import { Stack, Anchor, AppShell, Navbar } from '@svelteuidev/core';
 	import Logo from './_Logo.svelte';
 </script>
 

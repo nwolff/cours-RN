@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Drawbox from '$lib/Drawbox.svelte';
+	import DrawBox from '$lib/DrawBox.svelte';
 	import DistributionChart from '$lib/DistributionChart.svelte';
 	import NetworkGraph from '$lib/NetworkGraph.svelte';
 	import { Link } from '$lib/NetworkShape';
@@ -37,8 +37,6 @@
 				.reshape(pixels, [1, 28 * 28])
 				.toFloat()
 				.div(255)
-				.mul(-1)
-				.add(1)
 		);
 
 		twoHiddenLayersPrediction = tf
@@ -87,7 +85,7 @@
 <Grid cols={4}>
 	<Grid.Col span={1}>
 		<Space h="xl" />
-		<Drawbox brushWidth={12} on:imageData={handleDrawnImage} />
+		<DrawBox on:imageData={handleDrawnImage} />
 		<Space h="lg" />
 
 		<Divider />
