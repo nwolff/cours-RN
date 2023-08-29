@@ -1,5 +1,4 @@
-// Models the shape of a dense feed forward neural network
-// Positions are within the unit square.
+// Models the shape and layout of a dense feed forward neural network
 
 import type { LayerVariable } from '@tensorflow/tfjs';
 import { zip } from './pythonish';
@@ -28,44 +27,49 @@ export class Link {
 	}
 }
 
+// Describes the layout of a single layer.
 export declare interface LayerSpec {
 	name: string;
 	neuron_count: number;
-	neurons_per_row: number;
+	width: number;
+	height: number;
 	marker_size: number;
+	neurons_per_row?: number;
 	labels?: string[];
 }
 
+// Preforms the layout of a single layer, placing the neurons accordingly
 export class Layer {
 	name: string;
 	marker_size: number;
 	neurons: Neuron[];
 	labels?: string[];
 
-	constructor(rank: number, total_layer_count: number, spec: LayerSpec) {
+	constructor(layer_start_y: number, spec: LayerSpec) {
 		this.name = spec.name;
 		this.marker_size = spec.marker_size;
 		this.labels = spec.labels;
+
 		const neuron_count = spec.neuron_count;
-		const neurons_per_row = spec.neurons_per_row;
-		const spaceBetweenNeurons = 1 / neurons_per_row;
+		const neurons_per_row = spec.neurons_per_row || spec.neuron_count;
+		const number_of_rows = Math.ceil(neuron_count / neurons_per_row);
 
-		const rows_in_layer = Math.floor(neuron_count / neurons_per_row);
-		let y = 1 - rank / total_layer_count + rows_in_layer * spaceBetweenNeurons;
+		const space_between_neurons_x = spec.width / (neurons_per_row - 1);
+		const space_between_neurons_y = spec.height / (number_of_rows - 1);
 
-		let index_in_row = 0;
-		if (neuron_count < neurons_per_row) {
-			index_in_row = (neurons_per_row - neuron_count) / 2;
-		}
+		const row_x_start = (-space_between_neurons_x * (neurons_per_row - 1)) / 2;
 
 		const neurons = [];
 
+		let index_in_row = 0;
+		let y = layer_start_y;
+
 		for (let i = 0; i < neuron_count; i++) {
-			neurons.push(new Neuron(index_in_row / (neurons_per_row - 1), y));
+			neurons.push(new Neuron(row_x_start + index_in_row * space_between_neurons_x, y));
 			index_in_row++;
 			if (index_in_row == neurons_per_row) {
 				index_in_row = 0;
-				y -= spaceBetweenNeurons;
+				y -= space_between_neurons_y;
 			}
 		}
 
@@ -83,10 +87,12 @@ export class DenseNetwork {
 	layers: Layer[];
 	outputLayer: Layer;
 
-	constructor(...layer_specs: LayerSpec[]) {
+	constructor(layer_spacing: number, ...layer_specs: LayerSpec[]) {
 		this.layers = [];
-		for (const [rank, spec] of layer_specs.entries()) {
-			this.layers.push(new Layer(rank, layer_specs.length, spec));
+		let layer_y = 0;
+		for (const spec of layer_specs) {
+			this.layers.push(new Layer(layer_y, spec));
+			layer_y -= spec.height + layer_spacing;
 		}
 		this.outputLayer = this.layers[this.layers.length - 1];
 	}

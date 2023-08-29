@@ -118,10 +118,10 @@
 			visible: false
 		},
 		yaxis: {
-			visible: false
+			visible: false,
+			scaleanchor: 'x'
 		},
 		showlegend: false,
-		height: 650,
 		font: { size: 18, color: 'black' },
 		margin: { t: 0, l: 0, r: 0, b: 0 }
 	};
@@ -182,4 +182,4 @@
 	}
 </script>
 
-<div bind:this={plotElement} id="network-graph" class="network-graph" />
+<div bind:this={plotElement} id="network-graph" class="network-graph" style="height: 85vh" />

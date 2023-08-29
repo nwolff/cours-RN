@@ -19,28 +19,34 @@ export const learningRateStore = writable(0);
 
 export function getNetworkShape() {
 	return new DenseNetwork(
+		15,
 		{
 			name: "Couche d'entrée",
 			neuron_count: 28 * 28,
-			neurons_per_row: 14 * 7,
-			marker_size: 8
+			width: 22,
+			height: 22,
+			marker_size: 6,
+			neurons_per_row: 28
 		},
 		{
 			name: 'Couche cachée 1',
 			neuron_count: 30,
-			neurons_per_row: 40,
+			width: 60,
+			height: 0,
 			marker_size: 18
 		},
 		{
 			name: 'Couche cachée 2',
 			neuron_count: 30,
-			neurons_per_row: 40,
+			width: 60,
+			height: 0,
 			marker_size: 18
 		},
 		{
 			name: 'Couche de sortie',
 			neuron_count: 10,
-			neurons_per_row: 16,
+			width: 50,
+			height: 5,
 			marker_size: 18,
 			labels: Array.from({ length: 10 }, (_, i) => i.toString())
 		}

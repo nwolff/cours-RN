@@ -226,16 +226,6 @@
 	}
 
 	.numbers .normalizecanvas-wrapper {
-		flex: 1;
-		margin-left: 20px;
-		width: 70px;
-		height: 70px;
-		border: 1px groove #666;
-		box-sizing: content-box;
-	}
-	.numbers .normalizecanvas {
-		width: 70px;
-		height: 70px;
-		filter: invert(1);
+		display: none;
 	}
 </style>

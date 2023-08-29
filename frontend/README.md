@@ -23,7 +23,7 @@ Typechecking :
 ### Verifying the production build
 
 When building for prod, svelte tries to render server-side as much as possible to make
-pages appear rapidly.  A lot of our routes can only run in the browser and we disable 
+pages appear rapidly. A lot of our routes can only run in the browser and we disable
 server-side-rendering for those.
 
 This step makes sure we haven't forgotten anything.
