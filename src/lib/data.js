@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 /**
  * @license
  * Copyright 2018 Google LLC. All Rights Reserved.
@@ -46,6 +48,7 @@ export class MnistData {
 		const img = new Image();
 		const canvas = document.createElement('canvas');
 		const ctx = canvas.getContext('2d');
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const imgRequest = new Promise((resolve, reject) => {
 			img.crossOrigin = '';
 			img.onload = () => {
@@ -82,6 +85,7 @@ export class MnistData {
 		});
 
 		const labelsRequest = fetch(MNIST_LABELS_PATH);
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const [imgResponse, labelsResponse] = await Promise.all([imgRequest, labelsRequest]);
 
 		this.datasetLabels = new Uint8Array(await labelsResponse.arrayBuffer());

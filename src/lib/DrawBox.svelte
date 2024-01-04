@@ -17,7 +17,7 @@
 	let isdown = false;
 	let pointerId = -1;
 
-	const eventfunctions = {
+	const eventfunctions: { [id: string]: any } = {
 		pointerdown: (e: { clientX: number; clientY: number; pointerId: number }) => {
 			if (!isdown) {
 				setPosition(e);

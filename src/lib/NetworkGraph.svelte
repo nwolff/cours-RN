@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { DenseNetwork, Link, LinkFilter } from './NetworkShape';
+	import type { DenseNetwork, Link, LinkFilter, Layer } from './NetworkShape';
 	import type { LayerVariable } from '@tensorflow/tfjs';
 	import { onMount } from 'svelte';
-	import { DefaultMap, zip } from './pythonish';
-	import { hsv2rgb } from './colorConversion';
+	import { DefaultMap, zip2 } from './utils';
 	import { allLinks } from './NetworkShape';
 	import plotly from 'plotly.js-dist';
+	import { hsv2rgb } from './colorconversions';
 
 	let plotElement: HTMLElement;
 
@@ -20,7 +20,7 @@
 		drawGraph(networkShape, activations, weights, linkFilter);
 	});
 
-	function color_for_activation(activation: number): string {
+	function neuron_color(activation: number): string {
 		if (!activation) {
 			// A small optimization
 			return '#FFFFFF';
@@ -43,7 +43,7 @@
 				marker: {
 					// Without array.from mapping doesn't work properly
 					color: layerActivations
-						? Array.from(layerActivations).map((a) => color_for_activation(a))
+						? Array.from(layerActivations).map((a) => neuron_color(a))
 						: 'white',
 					symbol: 'circle',
 					line: { width: 0.7 },
@@ -60,14 +60,14 @@
 		return traces;
 	}
 
-	function color_for_weight(weight: number): string {
+	function link_color(weight: number): string {
 		// Red and blue ramps depending on the sign
 		const [r, g, b] = hsv2rgb(weight > 0 ? 0.66 : 0, Math.abs(weight), 0.9);
 		return `rgb(${r},${g},${b})`;
 	}
 
-	function width_for_weight(weight: number): number {
-		return Math.abs(weight * 1.3);
+	function link_width(weight: number): number {
+		return Math.abs(weight * 1.2);
 	}
 
 	function linkTraces(links: Link[]) {
@@ -103,8 +103,8 @@
 				mode: 'lines',
 				hoverinfo: 'skio',
 				line: {
-					width: width_for_weight(bucket / bucket_size),
-					color: color_for_weight(bucket / bucket_size)
+					width: link_width(bucket / bucket_size),
+					color: link_color(bucket / bucket_size)
 				}
 			};
 			traces.push(trace);
@@ -132,25 +132,25 @@
 		responsive: true
 	};
 
-	function makeGraphLayout(networkShape: DenseNetwork) {
-		// Add annotations under the output layer neurons
+	function makeOutputAnnotations(
+		outputLayer: Layer
+	): { x: number; y: number; yanchor: string; yshift: number; text: string; showarrow: boolean }[] {
 		// https://plotly.com/javascript/text-and-annotations/
 
 		const annotations = [];
-		const outputLayer = networkShape.outputLayer;
-		for (const [neuron, label] of zip(outputLayer.neurons, outputLayer.labels)) {
-			annotations.push({
-				x: neuron.x,
-				y: neuron.y,
-				yanchor: 'top',
-				yshift: -10,
-				text: label,
-				showarrow: false
-			});
+		if (outputLayer.labels) {
+			for (const [neuron, label] of zip2(outputLayer.neurons, outputLayer.labels)) {
+				annotations.push({
+					x: neuron.x,
+					y: neuron.y,
+					yanchor: 'top',
+					yshift: -10,
+					text: label,
+					showarrow: false
+				});
+			}
 		}
-		const layout = JSON.parse(JSON.stringify(defaultGraphLayout));
-		layout.annotations = annotations;
-		return layout;
+		return annotations;
 	}
 
 	function drawGraph(
@@ -176,7 +176,8 @@
 			traces.push(...linkTraces(links));
 		}
 
-		const graphLayout = makeGraphLayout(networkShape);
+		const graphLayout = JSON.parse(JSON.stringify(defaultGraphLayout));
+		graphLayout.annotations = makeOutputAnnotations(networkShape.outputLayer);
 
 		plotly.newPlot('network-graph', traces, graphLayout, graphConfig);
 	}

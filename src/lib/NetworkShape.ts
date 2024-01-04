@@ -1,7 +1,7 @@
 // Models the shape and layout of a dense feed forward neural network
 
 import type { LayerVariable } from '@tensorflow/tfjs';
-import { zip } from './pythonish';
+import { zip2, zip3 } from './utils';
 
 export class Neuron {
 	x: number;
@@ -20,7 +20,7 @@ export class Link {
 	b: Neuron;
 	weight: number;
 
-	constructor(a: Neuron, b: Neuron, weight = 0) {
+	constructor(a: Neuron, b: Neuron, weight: number) {
 		this.a = a;
 		this.b = b;
 		this.weight = weight;
@@ -50,26 +50,25 @@ export class Layer {
 		this.marker_size = spec.marker_size;
 		this.labels = spec.labels;
 
-		const neuron_count = spec.neuron_count;
 		const neurons_per_row = spec.neurons_per_row || spec.neuron_count;
-		const number_of_rows = Math.ceil(neuron_count / neurons_per_row);
+		const number_of_rows = Math.ceil(spec.neuron_count / neurons_per_row);
 
-		const space_between_neurons_x = spec.width / (neurons_per_row - 1);
-		const space_between_neurons_y = spec.height / (number_of_rows - 1);
+		const x_space_between_neurons = spec.width / (neurons_per_row - 1);
+		const y_space_between_neurons = spec.height / (number_of_rows - 1);
 
-		const row_x_start = (-space_between_neurons_x * (neurons_per_row - 1)) / 2;
+		const row_x_start = (-x_space_between_neurons * (neurons_per_row - 1)) / 2;
 
 		const neurons = [];
 
 		let index_in_row = 0;
 		let y = layer_start_y;
 
-		for (let i = 0; i < neuron_count; i++) {
-			neurons.push(new Neuron(row_x_start + index_in_row * space_between_neurons_x, y));
+		for (let i = 0; i < spec.neuron_count; i++) {
+			neurons.push(new Neuron(row_x_start + index_in_row * x_space_between_neurons, y));
 			index_in_row++;
 			if (index_in_row == neurons_per_row) {
 				index_in_row = 0;
-				y -= space_between_neurons_y;
+				y -= y_space_between_neurons;
 			}
 		}
 
@@ -77,6 +76,7 @@ export class Layer {
 	}
 }
 
+// As an optimizazion we allow callers to pass in a filter when requesting the links
 export type LinkFilter = (links: Link[]) => Link[];
 
 export function allLinks(links: Link[]) {
@@ -99,28 +99,28 @@ export class DenseNetwork {
 
 	getLinks(weights: LayerVariable[], activations: number[][], linkFilter: LinkFilter) {
 		if (activations) {
-			for (const [layer, activationsForLayer] of zip(this.layers, activations)) {
-				for (const [neuron, activation] of zip(layer.neurons, activationsForLayer)) {
+			for (const [layer, activationsForLayer] of zip2(this.layers, activations)) {
+				for (const [neuron, activation] of zip2(layer.neurons, activationsForLayer)) {
 					neuron.activation = activation;
 				}
 			}
 		}
 
 		const links: Link[] = [];
-		for (const [from_layer, to_layer, weights_between_layers_tensor] of zip(
+		for (const [from_layer, to_layer, weights_between_layers_tensor] of zip3(
 			this.layers.slice(0, -1),
 			this.layers.slice(1),
 			weights
 		)) {
-			const weights_between_layers = weights_between_layers_tensor.val.arraySync();
+			const weights_between_layers = weights_between_layers_tensor.read().arraySync() as number[][];
 
 			const layerLinks = [];
 
-			for (const [from_neuron, outgoing_weights_for_neuron] of zip(
+			for (const [from_neuron, outgoing_weights_for_neuron] of zip2(
 				from_layer.neurons,
 				weights_between_layers
 			)) {
-				for (const [to_neuron, weight] of zip(to_layer.neurons, outgoing_weights_for_neuron)) {
+				for (const [to_neuron, weight] of zip2(to_layer.neurons, outgoing_weights_for_neuron)) {
 					const link = new Link(from_neuron, to_neuron, weight);
 					layerLinks.push(link);
 				}
