@@ -1,13 +1,18 @@
 <script lang="ts">
-	import type { DenseNetwork, Link, LinkFilter, Layer } from './NetworkShape';
+	import type { DenseNetwork, Link, Layer } from './NetworkShape';
 	import type { LayerVariable } from '@tensorflow/tfjs';
 	import { onMount } from 'svelte';
 	import { DefaultMap, zip2 } from './utils';
-	import { allLinks } from './NetworkShape';
 	import plotly from 'plotly.js-dist';
 	import { hsv2rgb } from './colorconversions';
 
 	let plotElement: HTMLElement;
+
+	type LinkFilter = (links: Link[]) => Link[];
+
+	export function allLinks(links: Link[]) {
+		return links;
+	}
 
 	export let networkShape: DenseNetwork;
 	export let activations: number[][];
@@ -85,14 +90,14 @@
 		const edge_y_buckets = new DefaultMap<number, any>(() => []);
 		for (const link of links) {
 			const bucket = Math.round(link.weight * bucket_size);
-			const edge_x = edge_x_buckets.get(bucket);
-			const edge_y = edge_y_buckets.get(bucket);
-			edge_x.push(link.a.x);
-			edge_y.push(link.a.y);
-			edge_x.push(link.b.x);
-			edge_y.push(link.b.y);
-			edge_x.push(null);
-			edge_y.push(null);
+			const edge_x_bucket = edge_x_buckets.get(bucket);
+			const edge_y_bucket = edge_y_buckets.get(bucket);
+			edge_x_bucket.push(link.a.x);
+			edge_y_bucket.push(link.a.y);
+			edge_x_bucket.push(link.b.x);
+			edge_y_bucket.push(link.b.y);
+			edge_x_bucket.push(null);
+			edge_y_bucket.push(null);
 		}
 
 		const traces = [];
@@ -156,7 +161,7 @@
 	function drawGraph(
 		networkShape: DenseNetwork,
 		activations: number[][],
-		weights: LayerVariable[] | undefined,
+		weights: LayerVariable[],
 		linkFilter: LinkFilter
 	) {
 		if (!plotElement) {
@@ -168,13 +173,12 @@
 
 		traces.push(...neuronTraces(networkShape, activations));
 
-		if (weights) {
-			// We don't want the bias weights when generating the links
-			const kernelWeights = weights.filter((l) => l.originalName.endsWith('kernel'));
+		// We don't want the bias weights when generating the links
+		const kernelWeights = weights.filter((l) => l.originalName.endsWith('kernel'));
 
-			const links = networkShape.getLinks(kernelWeights, activations, linkFilter);
-			traces.push(...linkTraces(links));
-		}
+		const links = networkShape.getLinks(kernelWeights, activations);
+		const filteredLinks = linkFilter(links);
+		traces.push(...linkTraces(filteredLinks));
 
 		const graphLayout = JSON.parse(JSON.stringify(defaultGraphLayout));
 		graphLayout.annotations = makeOutputAnnotations(networkShape.outputLayer);

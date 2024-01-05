@@ -54,21 +54,19 @@
 
 		const activationsTensor = toFeatureModel($modelStore).predict(processedImage);
 		activations = [processedImage, ...activationsTensor].map((x) => tf.squeeze(x).dataSync());
-		// console.log("processed image", processedImage);
 
 		prediction = activations[activations.length - 1];
-		// console.log('prediction', prediction);
 	}
 
 	function keepTopLinks(links: Link[]): Link[] {
-		const length = links.length;
-		if (length <= 500) {
+		if (links.length <= 500) {
+			// A small optimization
 			return links;
 		}
 		const sortedLinks = [...links].sort(
 			(l1: Link, l2: Link) => Math.abs(l2.weight) - Math.abs(l1.weight)
 		);
-		return sortedLinks.slice(0, Math.min(500, 0.1 * length));
+		return sortedLinks.slice(0, Math.min(500, 0.1 * links.length));
 	}
 
 	function applyActivation(links: Link[]): Link[] {

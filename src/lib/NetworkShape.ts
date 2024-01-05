@@ -4,27 +4,18 @@ import type { LayerVariable } from '@tensorflow/tfjs';
 import { zip2, zip3 } from './utils';
 
 export class Neuron {
-	x: number;
-	y: number;
-	activation: number;
-
-	constructor(x: number, y: number, activation = 0) {
-		this.x = x;
-		this.y = y;
-		this.activation = activation;
-	}
+	constructor(
+		public readonly x: number,
+		public readonly y: number
+	) {}
 }
 
 export class Link {
-	a: Neuron;
-	b: Neuron;
-	weight: number;
-
-	constructor(a: Neuron, b: Neuron, weight: number) {
-		this.a = a;
-		this.b = b;
-		this.weight = weight;
-	}
+	constructor(
+		public readonly a: Neuron,
+		public readonly b: Neuron,
+		public readonly weight: number
+	) {}
 }
 
 // Describes the layout of a single layer.
@@ -76,13 +67,6 @@ export class Layer {
 	}
 }
 
-// As an optimizazion we allow callers to pass in a filter when requesting the links
-export type LinkFilter = (links: Link[]) => Link[];
-
-export function allLinks(links: Link[]) {
-	return links;
-}
-
 export class DenseNetwork {
 	layers: Layer[];
 	outputLayer: Layer;
@@ -97,15 +81,7 @@ export class DenseNetwork {
 		this.outputLayer = this.layers[this.layers.length - 1];
 	}
 
-	getLinks(weights: LayerVariable[], activations: number[][], linkFilter: LinkFilter) {
-		if (activations) {
-			for (const [layer, activationsForLayer] of zip2(this.layers, activations)) {
-				for (const [neuron, activation] of zip2(layer.neurons, activationsForLayer)) {
-					neuron.activation = activation;
-				}
-			}
-		}
-
+	getLinks(weights: LayerVariable[]) {
 		const links: Link[] = [];
 		for (const [from_layer, to_layer, weights_between_layers_tensor] of zip3(
 			this.layers.slice(0, -1),
@@ -125,8 +101,7 @@ export class DenseNetwork {
 					layerLinks.push(link);
 				}
 			}
-			const filteredLayerLinks = linkFilter(layerLinks);
-			links.push(...filteredLayerLinks);
+			links.push(...layerLinks);
 		}
 
 		return links;
